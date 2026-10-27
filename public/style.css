@@ -1,0 +1,498 @@
+main {
+    position: relative; 
+    min-height: 80vh; 
+}
+
+/* ==================== ULTRA-SMOOTH MENU & PAGE TRANSITIONS ==================== */
+.section {
+    display: none;
+    opacity: 0;
+    width: 100%;
+}
+
+.section.active {
+    display: block;
+    position: relative;
+    z-index: 10;
+    animation: sectionSmoothEntrance 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.section.section-exiting {
+    display: block !important;
+    animation: sectionSmoothExit 0.15s ease-in forwards !important;
+    pointer-events: none !important;
+}
+
+@keyframes sectionSmoothEntrance {
+    0% {
+        opacity: 0;
+        transform: translateY(18px) scale(0.995);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes sectionSmoothExit {
+    0% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-14px) scale(0.99);
+    }
+}
+
+/* Staggered entrance wave for sections */
+.section.active > * {
+    animation: sectionContentFloat 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes sectionContentFloat {
+    0% {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Song card entrance wave on page transitions */
+@keyframes songCardCascade {
+    0% {
+        opacity: 0;
+        transform: translateY(18px) scale(0.96);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.song-card-animated {
+    animation: songCardCascade 0.38s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Navbar Slider Pill with Spring Physics & Glowing Glassmorphism */
+#nav-slider {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.22) 0%, rgba(5, 150, 105, 0.32) 100%) !important;
+    border: 1px solid rgba(16, 185, 129, 0.45) !important;
+    box-shadow: 0 0 18px rgba(16, 185, 129, 0.28), inset 0 1px 1px rgba(255, 255, 255, 0.2) !important;
+    backdrop-filter: blur(12px) !important;
+    transition: all 0.36s cubic-bezier(0.34, 1.45, 0.64, 1) !important;
+}
+
+.nav-btn {
+    transition: color 0.25s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), text-shadow 0.25s ease !important;
+}
+
+.nav-btn:hover {
+    transform: translateY(-1px);
+}
+
+.nav-btn:active {
+    transform: translateY(1px) scale(0.96);
+}
+
+.nav-btn.active {
+    color: #34d399 !important;
+    font-weight: 700 !important;
+    text-shadow: 0 0 12px rgba(52, 211, 153, 0.5) !important;
+}
+
+body {
+    box-sizing: border-box;
+}
+.star-rating {
+    display: inline-flex;
+    gap: 2px;
+}
+
+.star.star-hovered {
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.7);
+}
+
+.star {
+    cursor: pointer;
+    color: #d1d5db;
+    transition: color 0.2s, box-shadow 0.1s ease-in-out; 
+    padding: 0 2px; 
+}
+.star.filled {
+    color: #fbbf24;
+}
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(10, 15, 29, 0.82);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    z-index: 1000;
+    overscroll-behavior: contain;
+}
+.modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: modalBackdropFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.modal.modal-closing {
+    display: flex !important;
+    animation: modalBackdropFadeOut 0.22s ease-in forwards !important;
+    pointer-events: none !important;
+}
+
+.modal.active > div {
+    animation: modalCardPopIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    will-change: transform, opacity;
+}
+.modal.modal-closing > div {
+    animation: modalCardPopOut 0.2s ease-in forwards !important;
+    will-change: transform, opacity;
+}
+
+#musicModal.active .modal-card-col-left {
+    animation: modalSlideUp 0.36s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+    animation-delay: 0.03s;
+}
+
+#musicModal.active .modal-card-col-right {
+    animation: modalSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+    animation-delay: 0.06s;
+}
+
+@keyframes modalSlideUp {
+    0% {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes modalBackdropFadeIn {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+@keyframes modalBackdropFadeOut {
+    0% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+@keyframes modalCardPopIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.96) translateY(12px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+@keyframes modalCardPopOut {
+    0% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.96) translateY(10px);
+    }
+}
+
+body.modal-open {
+    overflow: hidden !important;
+    overscroll-behavior: none !important;
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-in;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.cropper-container-wrapper {
+    max-height: 400px; 
+    overflow: hidden;
+    margin-bottom: 1rem;
+    background-color: #000;
+}
+#imageToCrop {
+    max-width: 100%; 
+    display: block;
+}
+
+#artistInfoContainer {
+    display: none;
+}
+
+#discover.artist-view-active {
+    display: grid; 
+    grid-template-columns: 1fr 2fr; 
+    gap: 2rem; 
+    align-items: start; 
+}
+
+#discover.artist-view-active #artistInfoContainer {
+    display: block !important; 
+    grid-column: 1 / 2; 
+}
+
+#discover.artist-view-active #artistInfoContainer > .bg-slate-800 { 
+    display: flex;
+    flex-direction: column; 
+    align-items: center; 
+    height: auto; 
+    padding: 1.5rem; 
+}
+#discover.artist-view-active #artistInfoContainer .text-center { 
+    text-align: center;
+}
+#discover.artist-view-active #artistDescription {
+    text-align: left; 
+}
+
+#discover.artist-view-active #discoverGrid {
+    display: flex !important; 
+    flex-direction: column !important; 
+    gap: 0.5rem !important; 
+    grid-column: 2 / 3; 
+    grid-template-columns: none !important; 
+    padding-top: 0; 
+}
+
+#discover.artist-view-active #discoverTitle,
+#discover.artist-view-active #genreFilterContainer,
+#discover.artist-view-active #discoverNavigation, 
+#discover.artist-view-active #discoverControls {
+    display: none !important;
+}
+
+#discover.search-mode-active #discoverTitle,
+#discover.search-mode-active #discoverControls {
+    display: none !important;
+}
+
+#discover.search-mode-active #artistInfoContainer {
+    display: none !important;
+}
+
+#nav-buttons-container .nav-btn {
+    color: #cbd5e1; 
+    transition: color 0.3s ease-in-out; 
+}
+#nav-buttons-container .nav-btn.text-green-500 {
+    color: #22c55e !important;
+}
+#nav-buttons-container .nav-btn.active {
+    color: #ffffff; 
+}
+#nav-slider {
+    z-index: 5; 
+}
+
+.playlist-card {
+    position: relative; 
+    overflow: hidden; 
+}
+
+.playlist-image-container {
+    aspect-ratio: 1 / 1; 
+    background-color: #334155; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem; 
+    color: #94a3b8; 
+}
+
+.playlist-image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; 
+}
+
+.playlist-menu-btn {
+    position: absolute;
+    top: 0.5rem; 
+    right: 0.5rem; 
+    background-color: rgba(0, 0, 0, 0.5); 
+    border-radius: 9999px; 
+    padding: 0.25rem; 
+    width: 2rem; 
+    height: 2rem; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 20;
+}
+
+.playlist-menu-dropdown {
+    display: none; 
+    position: absolute;
+    top: 2.75rem; 
+    right: 0.5rem; 
+    background-color: #1e293b; 
+    border: 1px solid #334155; 
+    border-radius: 0.375rem; 
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    z-index: 30;
+    width: 160px; 
+}
+
+.playlist-menu-dropdown.show {
+    display: block; 
+}
+
+.playlist-dropdown-item {
+    display: block;
+    width: 100%;
+    padding: 0.5rem 1rem; 
+    color: #cbd5e1; 
+    font-size: 0.875rem; 
+    text-align: left;
+}
+
+.playlist-dropdown-item:hover {
+    background-color: #334155; 
+    color: #ffffff; 
+}
+
+.remove-song-btn {
+    background-color: transparent;
+    color: #94a3b8; 
+    border: none;
+    cursor: pointer;
+    font-size: 1.25rem; 
+    padding: 0 0.5rem; 
+}
+.remove-song-btn:hover {
+    color: #ef4444; 
+}
+
+.artist-image-fade-container {
+    position: relative; 
+    width: 100%;
+    aspect-ratio: 1 / 1; 
+    overflow: hidden; 
+    margin-bottom: 1.5rem; 
+    border-radius: 0.75rem; 
+    background-color: #334155; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.artist-image-fade-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute; 
+    z-index: 1;
+}
+
+.artist-image-fade-container .overlay-fade {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 50%; 
+    background: linear-gradient(to top, var(--bg-primary, #1e293b) 0%, rgba(30, 41, 59, 0) 100%);
+    z-index: 2; 
+    pointer-events: none; 
+}
+
+:root {
+    --bg-primary: #1e293b; 
+}
+
+#searchSuggestions {
+    background-color: #0f172a !important;
+    opacity: 1 !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.85), 0 10px 10px -5px rgba(0, 0, 0, 0.65) !important;
+}
+
+/* ==========================================
+   INTERACTIVE GREEN AUDIO SEEK BAR STYLES
+   ========================================== */
+.player-seek-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 6px;
+    border-radius: 9999px;
+    background: linear-gradient(to right, #10b981 0%, #10b981 0%, #334155 0%, #334155 100%);
+    outline: none;
+    cursor: pointer;
+    transition: height 0.15s ease;
+}
+
+.player-seek-slider:hover,
+.player-seek-slider:active {
+    height: 8px;
+}
+
+/* WebKit (Chrome, Edge, Safari) Thumb */
+.player-seek-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.9), 0 2px 4px rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+    transition: transform 0.15s ease, background-color 0.15s ease;
+    border: 2.5px solid #10b981;
+}
+
+.player-seek-slider:hover::-webkit-slider-thumb,
+.player-seek-slider:active::-webkit-slider-thumb {
+    transform: scale(1.3);
+    background: #10b981;
+    border-color: #ffffff;
+}
+
+/* Firefox Thumb */
+.player-seek-slider::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.9), 0 2px 4px rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+    border: 2.5px solid #10b981;
+    transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+.player-seek-slider:hover::-moz-range-thumb,
+.player-seek-slider:active::-moz-range-thumb {
+    transform: scale(1.3);
+    background: #10b981;
+    border-color: #ffffff;
+}
