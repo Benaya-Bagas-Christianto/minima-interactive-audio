@@ -318,26 +318,7 @@
         </div>
     </div>
 
-    <!-- Video Modal (YouTube Music Video Embed) -->
-    <div id="videoModal" class="modal">
-        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-4xl w-full mx-4 p-6 shadow-2xl relative">
-            <div class="flex justify-between items-center mb-4 border-b border-slate-800 pb-3">
-                <div class="flex items-center space-x-2 text-red-500">
-                    <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M10 15l5.19-3L10 9v6m11.56-7.83c.13.47.22 1.1.28 1.9.07.8.1 1.49.1 2.09L22 12c0 2.19-.16 3.8-.44 4.83-.25.9-.83 1.48-1.73 1.73-.47.13-1.33.22-2.65.28-1.3.07-2.49.1-3.59.1L12 22c-4.19 0-6.8-.16-7.83-.44-.9-.25-1.48-.83-1.73-1.73-.13-.47-.22-1.1-.28-1.9-.07-.8-.1-1.49-.1-2.09L2 12c0-2.19.16-3.8.44-4.83.25-.9.83-1.48 1.73-1.73.47-.13 1.33-.22 2.65-.28 1.3-.07 2.49-.1 3.59-.1L12 2c4.19 0 6.8.16 7.83.44.9.25 1.48.83 1.73 1.73z"/></svg>
-                    <h3 id="videoModalTitle" class="text-xl font-bold text-white">Pemutar Video Musik</h3>
-                </div>
-                <button onclick="closeVideoModal()" class="text-slate-400 hover:text-white text-2xl transition-colors">&times;</button>
-            </div>
-            
-            <div class="relative w-full aspect-video bg-black rounded-xl overflow-hidden shadow-2xl border border-slate-800">
-                <iframe id="videoIframe" class="w-full h-full" src="" title="Music Video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-            </div>
-
-            <p class="text-xs text-slate-400 mt-3 text-center">Elemen Multimedia Video terintegrasi secara dinamis berdasarkan data lagu.</p>
-        </div>
-    </div>
-
     <!-- Scripts -->
     <script src="{{ asset('js/minima-app.js') }}?v={{ filemtime(public_path('js/minima-app.js')) }}"></script>
 </body>
-</
+</html>

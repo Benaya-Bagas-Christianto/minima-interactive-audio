@@ -69,7 +69,6 @@ function initModalBackdropEvents() {
                 if (modal.id === 'musicModal') closeMusicModal();
                 else if (modal.id === 'vinylModal') closeVinylModal();
                 else if (modal.id === 'lyricsModal') closeLyricsModal();
-                else if (modal.id === 'videoModal') closeVideoModal();
                 else {
                     modal.classList.add('modal-closing');
                     setTimeout(() => {
@@ -89,7 +88,6 @@ function initModalBackdropEvents() {
                 if (m.id === 'musicModal') closeMusicModal();
                 else if (m.id === 'vinylModal') closeVinylModal();
                 else if (m.id === 'lyricsModal') closeLyricsModal();
-                else if (m.id === 'videoModal') closeVideoModal();
                 else {
                     m.classList.add('modal-closing');
                     setTimeout(() => {
@@ -1424,7 +1422,6 @@ window.lyricsCache = window.lyricsCache || {};
 let currentLyricsLines = [];
 let currentLyricsSongId = null;
 let activeLyricIndex = -1;
-let lyricsTimeOffset = 0; // dalam detik (bisa dikalibrasi -0.5s / +0.5s oleh user)
 let lyricsSyncInterval = null;
 let activeLyricsRequestId = 0;
 
@@ -1543,15 +1540,6 @@ function stopLyricsSyncLoop() {
     }
 }
 
-function adjustLyricsOffset(delta) {
-    lyricsTimeOffset = Math.round((lyricsTimeOffset + delta) * 10) / 10;
-    const label = document.getElementById('lyricsOffsetLabel');
-    if (label) {
-        label.textContent = `${lyricsTimeOffset > 0 ? '+' : ''}${lyricsTimeOffset.toFixed(1)}s`;
-    }
-    syncActiveLyricLine(getCurrentAudioTime(), true);
-}
-
 function parseLrcLyrics(lrcText, plainText, totalDuration) {
     const lines = [];
     if (lrcText && typeof lrcText === 'string') {
@@ -1611,11 +1599,6 @@ function parseLrcLyrics(lrcText, plainText, totalDuration) {
 function loadSongLyrics(song) {
     if (!song || !song.title) return;
     const container = document.getElementById('lyricsScrollContainer');
-    const badge = document.getElementById('lyricsSyncBadge');
-
-    lyricsTimeOffset = 0;
-    const offsetLabel = document.getElementById('lyricsOffsetLabel');
-    if (offsetLabel) offsetLabel.textContent = '0.0s';
 
     const cacheKey = song.id || `${song.title}_${song.artist}`;
     if (window.lyricsCache[cacheKey]) {
@@ -1678,30 +1661,15 @@ function loadSongLyrics(song) {
         })
         .catch(() => {
             if (reqId !== activeLyricsRequestId) return;
-            if (badge) badge.textContent = 'Instrumental / Info';
             applyLyricsPayload({ synced: false, syncedLyrics: null, plainLyrics: null }, song);
         });
 }
 
 function applyLyricsPayload(payload, song) {
     currentLyricsSongId = song.id;
-    const badge = document.getElementById('lyricsSyncBadge');
     const dur = getCurrentAudioDuration();
 
     currentLyricsLines = parseLrcLyrics(payload.syncedLyrics, payload.plainLyrics, dur);
-
-    if (badge) {
-        if (payload.syncedLyrics) {
-            badge.textContent = 'Live Synced • Akurat';
-            badge.className = 'text-emerald-400 text-[11px] font-semibold px-2.5 py-0.5 bg-emerald-950/80 border border-emerald-500/30 rounded-full';
-        } else if (payload.plainLyrics) {
-            badge.textContent = 'Auto-Scroll Lyrics';
-            badge.className = 'text-amber-400 text-[11px] font-semibold px-2.5 py-0.5 bg-amber-950/80 border border-amber-500/30 rounded-full';
-        } else {
-            badge.textContent = 'Instrumental / Tanpa Lirik';
-            badge.className = 'text-slate-400 text-[11px] font-semibold px-2.5 py-0.5 bg-slate-800 border border-slate-700 rounded-full';
-        }
-    }
 
     renderLyricsLines(song);
     activeLyricIndex = -1;
@@ -1740,7 +1708,7 @@ function syncActiveLyricLine(currentSeconds, forceInstantScroll = false) {
     if (!currentLyricsLines || currentLyricsLines.length === 0) return;
 
     // Waktu efektif dengan antisipasi 0.22 detik agar highlight lirik tepat bersamaan saat penyanyi mulai membuka suara
-    const effectiveTime = Math.max(0, (parseFloat(currentSeconds) || 0) - lyricsTimeOffset + 0.22);
+    const effectiveTime = Math.max(0, (parseFloat(currentSeconds) || 0) + 0.22);
 
     let newIndex = 0;
     for (let i = 0; i < currentLyricsLines.length; i++) {
@@ -1833,71 +1801,7 @@ function seekToLyricTime(lyricTimeSec) {
     }
 }
 
-/* ==================== 4. VIDEO MV PLAYER MODAL ==================== */
-function openVideoModal(videoId, title, artist) {
-    let song = currentSong || {};
-    if (title && artist) {
-        song = { title, artist, video_id: videoId, videoId };
-    } else if (currentDetailSong && (!currentSong || currentDetailSong.id === currentSong.id)) {
-        song = currentDetailSong;
-    }
-
-    const songTitle = song.title ? `${song.title} (${song.artist})` : 'Musik';
-    document.getElementById('videoModalTitle').textContent = `Video Klip: ${songTitle}`;
-
-    // Hentikan pemutaran audio latar belakang agar suaranya tidak bertabrakan dengan video klip
-    if (currentPlaybackMode === 'youtube' && ytAudioPlayer && isYtReady) {
-        try { ytAudioPlayer.pauseVideo(); } catch (e) {}
-    }
-    const audio = document.getElementById('globalAudioPlayer');
-    if (audio && !audio.paused) {
-        audio.pause();
-    }
-    isAudioPlaying = false;
-    updatePlayIcons(false);
-    stopYtProgressTimer();
-
-    const iframe = document.getElementById('videoIframe');
-
-    // Cek jika ada videoId spesifik dari YouTube
-    const vid = videoId || (song && (song.video_id || song.videoId));
-    const isBohemian = song.title && song.title.toLowerCase().includes('bohemian');
-
-    let startSec = 0;
-    if (currentPlaybackMode === 'youtube' && ytAudioPlayer && isYtReady) {
-        try {
-            startSec = Math.floor(ytAudioPlayer.getCurrentTime() || 0);
-        } catch (e) {}
-    }
-    const startParam = startSec > 0 ? `&start=${startSec}` : '';
-
-    if (vid && (vid !== 'fJ9rUzIMcZQ' || isBohemian) && vid.length >= 8) {
-        iframe.src = `https://www.youtube.com/embed/${vid}?autoplay=1&enablejsapi=1${startParam}`;
-    } else if (song.title && song.artist) {
-        // Embed YouTube pencarian otomatis MV resmi untuk lagu & artis ini
-        const query = encodeURIComponent(`${song.artist} ${song.title} official music video`);
-        iframe.src = `https://www.youtube.com/embed?listType=search&list=${query}&autoplay=1`;
-    } else {
-        iframe.src = `https://www.youtube.com/embed/fJ9rUzIMcZQ?autoplay=1&enablejsapi=1`;
-    }
-
-    document.getElementById('videoModal').classList.add('active');
-    lockBodyScroll();
-}
-
-function closeVideoModal() {
-    const modal = document.getElementById('videoModal');
-    const iframe = document.getElementById('videoIframe');
-    iframe.src = '';
-    if (!modal || !modal.classList.contains('active')) return;
-    modal.classList.add('modal-closing');
-    setTimeout(() => {
-        modal.classList.remove('active', 'modal-closing');
-        unlockBodyScroll();
-    }, 220);
-}
-
-/* ==================== 5. CATALOG & FILTER API (PAGINATION MULTI-HALAMAN) ==================== */
+/* ==================== 4. CATALOG & FILTER API (PAGINATION MULTI-HALAMAN) ==================== */
 let currentCatalogPage = 1;
 
 function fetchMusics(page = 1, smoothScroll = false) {
@@ -2494,13 +2398,6 @@ function renderModalSongData(song) {
             setTimeout(() => {
                 openLyricsWithSong(song.title, song.artist, finalImg, song.id, song.audio_url, song.video_id);
             }, 180);
-        };
-    }
-
-    const btnVideo = document.getElementById('modalOpenVideoBtn');
-    if (btnVideo) {
-        btnVideo.onclick = () => {
-            openVideoModal(song.video_id, song.title, song.artist);
         };
     }
 
