@@ -3133,25 +3133,10 @@ function deleteReview(id) {
     });
 }
 
-/* ==================== 9. TOAST NOTIFICATION ==================== */
-function showToast(message, type = 'success') {
+/* ==================== 9. TOAST NOTIFICATION (DISABLED) ==================== */
+function showToast() {
     const existing = document.getElementById('minimaToast');
     if (existing) existing.remove();
-
-    const toast = document.createElement('div');
-    toast.id = 'minimaToast';
-    toast.className = `fixed bottom-24 right-6 z-50 px-4 py-3 rounded-xl shadow-2xl flex items-center space-x-2 text-xs font-bold text-white transition-all transform translate-y-4 opacity-0 border border-white/20 backdrop-blur-md ${type === 'error' ? 'bg-red-600' : 'bg-emerald-600'}`;
-    toast.innerHTML = `<span>${type === 'error' ? '⚠️' : '✅'}</span><span>${message}</span>`;
-
-    document.body.appendChild(toast);
-    setTimeout(() => {
-        toast.classList.remove('translate-y-4', 'opacity-0');
-    }, 10);
-
-    setTimeout(() => {
-        toast.classList.add('translate-y-4', 'opacity-0');
-        setTimeout(() => toast.remove(), 400);
-    }, 3000);
 }
 
 function escapeQuote(str) {
