@@ -445,10 +445,11 @@ function playSong(id, title, artist, cover, audioUrl, videoId) {
         resolvedAudioUrl = resolvedAudioUrl.startsWith('/') ? resolvedAudioUrl : '/' + resolvedAudioUrl;
     }
 
-    currentSong = { id, title, artist, cover, audioUrl: resolvedAudioUrl, videoId };
+    const finalCover = normalizeImageUrl(cover);
+    currentSong = { id, title, artist, cover: finalCover, audioUrl: resolvedAudioUrl, videoId };
 
     if (!currentSongQueue.some(s => s.id === id)) {
-        currentSongQueue.push({ id, title, artist, image: cover, audio_url: resolvedAudioUrl, video_id: videoId });
+        currentSongQueue.push({ id, title, artist, image: finalCover, audio_url: resolvedAudioUrl, video_id: videoId });
     }
 
     // Tampilkan player bar di bagian bawah layar saat lagu pertama kali diklik
@@ -460,16 +461,10 @@ function playSong(id, title, artist, cover, audioUrl, videoId) {
 
     document.getElementById('playerTitle').textContent = title;
     document.getElementById('playerArtist').textContent = artist;
-    document.getElementById('playerCover').src = cover;
+    document.getElementById('playerCover').src = finalCover;
 
-    const vinylTitle = document.getElementById('vinylSongTitle');
-    const vinylArtist = document.getElementById('vinylSongArtist');
-    const vinylCover = document.getElementById('vinylModalCover');
-    if (vinylTitle) vinylTitle.textContent = title;
-    if (vinylArtist) vinylArtist.textContent = artist;
-    if (vinylCover) vinylCover.src = cover;
-
-    updateVinylTexture(cover);
+    // Sinkronisasi data 3D vinyl dan modal secara terpusat tanpa race condition
+    updateVinylDisplay(title, artist, finalCover);
 
     // Hentikan pemutar HTML5 jika sedang berjalan
     const html5Audio = document.getElementById('globalAudioPlayer');
@@ -1160,69 +1155,165 @@ function initThreeJSVinyl() {
     window.addEventListener('resize', onWindowResize);
 }
 
+/* ==================== 3.1 THREE.JS VINYL TEXTURE & DISPLAY SYNC ==================== */
+let vinylTextureCache = new Map();
+let activeVinylRequestId = 0;
+let vinylLabelMesh = null;
+let vinylLabelGroup = null;
+const threeTextureLoader = new THREE.TextureLoader();
+threeTextureLoader.crossOrigin = 'anonymous';
+
+function normalizeImageUrl(url) {
+    if (!url || typeof url !== 'string' || url.trim() === '') {
+        return '/image/queen1.jpg';
+    }
+    const trimmed = url.trim();
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+        return trimmed;
+    }
+    return trimmed.startsWith('/') ? trimmed : '/' + trimmed;
+}
+
+function configureThreeTexture(texture) {
+    texture.generateMipmaps = true;
+    texture.minFilter = THREE.LinearMipmapLinearFilter;
+    texture.magFilter = THREE.LinearFilter;
+    if (threeRenderer && threeRenderer.capabilities) {
+        texture.anisotropy = Math.min(16, threeRenderer.capabilities.getMaxAnisotropy() || 1);
+    }
+    texture.center.set(0.5, 0.5);
+    texture.needsUpdate = true;
+}
+
+function ensureVinylLabelStructure() {
+    if (!vinylMesh) return;
+    if (vinylLabelMesh && vinylLabelGroup && vinylLabelGroup.parent === vinylMesh) return;
+
+    // Bersihkan label lama jika ada
+    const old = vinylMesh.getObjectByName('vinylLabel');
+    if (old) vinylMesh.remove(old);
+
+    vinylLabelGroup = new THREE.Group();
+    vinylLabelGroup.name = 'vinylLabel';
+
+    // 1. Piringan tengah kover album melingkar (Circular Artwork Center)
+    const labelGeo = new THREE.CircleGeometry(1.15, 64);
+    const labelMat = new THREE.MeshBasicMaterial({
+        color: 0xffffff,
+        side: THREE.FrontSide,
+        depthWrite: true
+    });
+    vinylLabelMesh = new THREE.Mesh(labelGeo, labelMat);
+    vinylLabelMesh.rotation.x = -Math.PI / 2;
+    vinylLabelMesh.position.y = 0.027;
+    vinylLabelGroup.add(vinylLabelMesh);
+
+    // 2. Lingkaran luar beraksen emerald metalik mengkilap
+    const rimGeo = new THREE.RingGeometry(1.14, 1.18, 64);
+    const rimMat = new THREE.MeshStandardMaterial({
+        color: 0x34d399,
+        metalness: 0.9,
+        roughness: 0.2,
+        side: THREE.FrontSide
+    });
+    const rimMesh = new THREE.Mesh(rimGeo, rimMat);
+    rimMesh.rotation.x = -Math.PI / 2;
+    rimMesh.position.y = 0.028;
+    vinylLabelGroup.add(rimMesh);
+
+    // 3. Cincin lubang poros tengah spindle krom
+    const holeGeo = new THREE.RingGeometry(0.09, 0.16, 32);
+    const holeMat = new THREE.MeshStandardMaterial({
+        color: 0xe2e8f0,
+        metalness: 0.95,
+        roughness: 0.1,
+        side: THREE.FrontSide
+    });
+    const holeMesh = new THREE.Mesh(holeGeo, holeMat);
+    holeMesh.rotation.x = -Math.PI / 2;
+    holeMesh.position.y = 0.028;
+    vinylLabelGroup.add(holeMesh);
+
+    vinylMesh.add(vinylLabelGroup);
+}
+
 function updateVinylTexture(imageUrl) {
     if (!vinylMesh) return;
+    ensureVinylLabelStructure();
 
-    const loader = new THREE.TextureLoader();
-    loader.crossOrigin = 'anonymous';
-    loader.load(imageUrl, (texture) => {
-        // High-definition texture rendering
-        texture.generateMipmaps = true;
-        texture.minFilter = THREE.LinearMipmapLinearFilter;
-        texture.magFilter = THREE.LinearFilter;
-        if (threeRenderer && threeRenderer.capabilities) {
-            texture.anisotropy = Math.min(16, threeRenderer.capabilities.getMaxAnisotropy() || 1);
+    const normalizedUrl = normalizeImageUrl(imageUrl);
+    const requestId = ++activeVinylRequestId;
+
+    const applyTextureToMesh = (texture) => {
+        // Guard token: Abaikan respon yang terlambat jika user sudah berpindah ke lagu lain
+        if (requestId !== activeVinylRequestId) {
+            return;
         }
-        texture.center.set(0.5, 0.5);
-        texture.needsUpdate = true;
 
-        const oldLabel = vinylMesh.getObjectByName('vinylLabel');
-        if (oldLabel) vinylMesh.remove(oldLabel);
+        configureThreeTexture(texture);
 
-        const labelGroup = new THREE.Group();
-        labelGroup.name = 'vinylLabel';
+        if (vinylLabelMesh) {
+            vinylLabelMesh.material.map = texture;
+            vinylLabelMesh.material.needsUpdate = true;
+            vinylLabelMesh.visible = true;
+        }
+    };
 
-        // 1. High-resolution circular image label (Right-side up with -Math.PI / 2)
-        const labelGeo = new THREE.CircleGeometry(1.15, 64);
-        const labelMat = new THREE.MeshBasicMaterial({
-            map: texture,
-            side: THREE.FrontSide
-        });
-        const labelMesh = new THREE.Mesh(labelGeo, labelMat);
-        labelMesh.rotation.x = -Math.PI / 2; // NORMAL POINTS STRAIGHT UP (+Y)!
-        labelMesh.position.y = 0.027; // sits flush on top of vinyl disc
-        labelGroup.add(labelMesh);
+    // 1. Cek Memory Cache (0 milidetik swap seketika tanpa delay)
+    if (vinylTextureCache.has(normalizedUrl)) {
+        applyTextureToMesh(vinylTextureCache.get(normalizedUrl));
+        return;
+    }
 
-        // 2. Shiny metallic emerald outer rim ring
-        const rimGeo = new THREE.RingGeometry(1.14, 1.18, 64);
-        const rimMat = new THREE.MeshStandardMaterial({
-            color: 0x34d399,
-            metalness: 0.9,
-            roughness: 0.2,
-            side: THREE.FrontSide
-        });
-        const rimMesh = new THREE.Mesh(rimGeo, rimMat);
-        rimMesh.rotation.x = -Math.PI / 2;
-        rimMesh.position.y = 0.028;
-        labelGroup.add(rimMesh);
+    // 2. Cek apakah kover gambar sudah pernah dimuat oleh DOM peramban di halaman
+    // Jika gambar sudah ada di memori browser, buat tekstur seketika (0ms)
+    const cleanPath = normalizedUrl.replace(/^\//, '');
+    const domImg = document.querySelector(`img[src="${normalizedUrl}"], img[src="/${cleanPath}"], img[src="${cleanPath}"]`);
+    if (domImg && domImg.complete && domImg.naturalWidth > 0) {
+        try {
+            const instantTex = new THREE.CanvasTexture(domImg);
+            vinylTextureCache.set(normalizedUrl, instantTex);
+            applyTextureToMesh(instantTex);
+            return;
+        } catch (e) {
+            // fallback jika ada batasan cross-origin lokal
+        }
+    }
 
-        // 3. Center chrome spindle hole ring
-        const holeGeo = new THREE.RingGeometry(0.09, 0.16, 32);
-        const holeMat = new THREE.MeshStandardMaterial({
-            color: 0xe2e8f0,
-            metalness: 0.95,
-            roughness: 0.1,
-            side: THREE.FrontSide
-        });
-        const holeMesh = new THREE.Mesh(holeGeo, holeMat);
-        holeMesh.rotation.x = -Math.PI / 2;
-        holeMesh.position.y = 0.028;
-        labelGroup.add(holeMesh);
+    // 3. Muat tekstur via TextureLoader dengan request ID guarding ketat
+    threeTextureLoader.load(
+        normalizedUrl,
+        (loadedTexture) => {
+            // Jika user sudah berpindah lagu saat gambar ini masih loading, buang tekstur lama
+            if (requestId !== activeVinylRequestId) {
+                loadedTexture.dispose();
+                return;
+            }
+            vinylTextureCache.set(normalizedUrl, loadedTexture);
+            applyTextureToMesh(loadedTexture);
+        },
+        undefined,
+        (err) => {
+            console.warn('Gagal memuat tekstur vinyl:', normalizedUrl, err);
+            if (requestId === activeVinylRequestId && normalizedUrl !== '/image/queen1.jpg') {
+                updateVinylTexture('/image/queen1.jpg');
+            }
+        }
+    );
+}
 
-        vinylMesh.add(labelGroup);
-    }, undefined, (err) => {
-        console.warn('Failed to load vinyl texture:', err);
-    });
+// Sinkronisasi seluruh informasi visual 3D Vinyl (judul, artis, kover, tekstur piringan) secara terpusat
+function updateVinylDisplay(title, artist, cover) {
+    const finalCover = normalizeImageUrl(cover);
+    const vinylTitle = document.getElementById('vinylSongTitle');
+    const vinylArtist = document.getElementById('vinylSongArtist');
+    const vinylCover = document.getElementById('vinylModalCover');
+
+    if (vinylTitle) vinylTitle.textContent = title || 'Putar Musik';
+    if (vinylArtist) vinylArtist.textContent = artist || '-';
+    if (vinylCover) vinylCover.src = finalCover;
+
+    updateVinylTexture(finalCover);
 }
 
 function onWindowResize() {
@@ -1237,15 +1328,18 @@ function onWindowResize() {
 
 function openVinylModal() {
     const modal = document.getElementById('vinylModal');
+    if (!modal) return;
+
+    modal.classList.remove('modal-closing');
     modal.classList.add('active');
     lockBodyScroll();
+
     if (currentSong) {
-        if (currentSong.title) document.getElementById('vinylSongTitle').textContent = currentSong.title;
-        if (currentSong.artist) document.getElementById('vinylSongArtist').textContent = currentSong.artist;
-        const vinylCover = document.getElementById('vinylModalCover');
-        if (vinylCover && currentSong.cover) vinylCover.src = currentSong.cover;
-        if (currentSong.cover) updateVinylTexture(currentSong.cover);
+        updateVinylDisplay(currentSong.title, currentSong.artist, currentSong.cover);
+    } else {
+        updateVinylDisplay('Bohemian Rhapsody', 'Queen', '/image/queen1.jpg');
     }
+
     setTimeout(onWindowResize, 50);
 }
 
@@ -1260,18 +1354,18 @@ function closeVinylModal() {
 }
 
 function openVinylWithSong(title, artist, cover, id, audioUrl, videoId) {
-    document.getElementById('vinylSongTitle').textContent = title;
-    document.getElementById('vinylSongArtist').textContent = artist;
-    const vinylCover = document.getElementById('vinylModalCover');
-    if (vinylCover) vinylCover.src = cover;
+    const finalCover = normalizeImageUrl(cover);
 
-    updateVinylTexture(cover);
-    openVinylModal();
-
-    // Jika lagu ini memiliki ID dan belum diputar / berbeda lagu, langsung mulai putar!
+    // 1. Putar lagu seketika (ini langsung memperbarui currentSong dan updateVinylDisplay dalam 0ms)
     if (id) {
-        playSong(id, title, artist, cover, audioUrl, videoId);
+        playSong(id, title, artist, finalCover, audioUrl, videoId);
+    } else {
+        currentSong = { id: null, title, artist, cover: finalCover, audioUrl, videoId };
+        updateVinylDisplay(title, artist, finalCover);
     }
+
+    // 2. Buka modal piringan hitam 3D
+    openVinylModal();
 }
 
 /* ==================== 4. VIDEO MV PLAYER MODAL ==================== */
@@ -1368,6 +1462,23 @@ function fetchMusics(page = 1, smoothScroll = false) {
             songs.forEach(s => {
                 window.songDataCache[s.id] = s;
             });
+
+            // Pre-warm tekstur vinyl 3D secara hening di latar belakang
+            if (typeof window.requestIdleCallback === 'function') {
+                window.requestIdleCallback(() => {
+                    songs.slice(0, 8).forEach(s => {
+                        if (s.image) {
+                            const norm = normalizeImageUrl(s.image);
+                            if (!vinylTextureCache.has(norm)) {
+                                threeTextureLoader.load(norm, (tex) => {
+                                    configureThreeTexture(tex);
+                                    vinylTextureCache.set(norm, tex);
+                                }, undefined, () => {});
+                            }
+                        }
+                    });
+                });
+            }
 
             const countBadge = document.getElementById('discoverTotalCount');
             if (countBadge) {
