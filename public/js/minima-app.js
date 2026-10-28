@@ -440,7 +440,6 @@ function isLocalFullAudio(url) {
 }
 
 function fetchFullAudioAndPlay(id, title, artist, fallbackAudioUrl) {
-    showToast(`Memuat audio penuh: ${title}...`, 'info');
     fetch(`/api/musics/${id}/prepare-audio`)
         .then(res => res.json())
         .then(data => {
@@ -450,7 +449,6 @@ function fetchFullAudioAndPlay(id, title, artist, fallbackAudioUrl) {
                     currentSong.audioUrl = data.audio_url;
                 }
                 startAudioPlayback(data.audio_url);
-                showToast(`Memutar Full Durasi: ${title} - ${artist}`, 'success');
             } else {
                 currentPlaybackMode = 'html5';
                 if (fallbackAudioUrl) {
@@ -513,7 +511,6 @@ function playSong(id, title, artist, cover, audioUrl, videoId) {
         const streamUrl = `/api/musics/${id}/stream`;
         currentSong.audioUrl = streamUrl;
         startAudioPlayback(streamUrl);
-        showToast(`Memutar Full Durasi: ${title} - ${artist}`, 'success');
         return;
     }
 
@@ -523,10 +520,8 @@ function playSong(id, title, artist, cover, audioUrl, videoId) {
         currentPlaybackMode = 'youtube';
         if (isYtReady && ytAudioPlayer) {
             playYouTubeTrack(vid);
-            showToast(`Memutar Full Durasi: ${title} - ${artist}`);
         } else {
             pendingYtVideoId = vid;
-            showToast(`Memuat pemutar musik: ${title} - ${artist}`);
         }
     } else {
         // Fallback otomatis siapkan audio full
@@ -557,7 +552,6 @@ function handleAudioPlaybackFallback() {
         currentPlaybackMode = 'youtube';
         if (isYtReady && ytAudioPlayer) {
             playYouTubeTrack(currentSong.videoId);
-            showToast(`Memutar Audio Online: ${currentSong.title} - ${currentSong.artist}`);
             return;
         }
     }
@@ -618,13 +612,11 @@ function togglePlayAudio() {
                 isAudioPlaying = false;
                 updatePlayIcons(false);
                 stopYtProgressTimer();
-                showToast('Musik dijeda (Paused)');
             } else {
                 ytAudioPlayer.playVideo();
                 isAudioPlaying = true;
                 updatePlayIcons(true);
                 startYtProgressTimer();
-                showToast('Memutar musik...');
             }
             return;
         } catch (e) {
@@ -639,7 +631,6 @@ function togglePlayAudio() {
         stopSynthesizedPreview();
         isAudioPlaying = false;
         updatePlayIcons(false);
-        showToast('Audio dijeda (Paused)');
     } else {
         if (audio.src) {
             audio.play().then(() => {
@@ -651,7 +642,6 @@ function togglePlayAudio() {
         } else {
             playSynthesizedPreview();
         }
-        showToast('Memutar audio...');
     }
 }
 
@@ -709,8 +699,6 @@ function closeAudioPlayer() {
 
     // 7. Bersihkan data lagu yang sedang diputar
     currentSong = null;
-
-    showToast('Pemutar musik dimatikan.');
 }
 
 function updatePlayIcons(playing) {
@@ -916,13 +904,11 @@ function playPrevSong() {
             prevSong.audio_url || '',
             prevSong.video_id || ''
         );
-        showToast(`Memutar: ${prevSong.title} - ${prevSong.artist}`, 'info');
     }
 }
 
 function playNextSong() {
     if (!currentSongQueue || currentSongQueue.length === 0) {
-        showToast('Antrean lagu kosong.', 'info');
         return;
     }
     let currentIndex = currentSongQueue.findIndex(s => s.id === (currentSong ? currentSong.id : -1));
@@ -937,7 +923,6 @@ function playNextSong() {
             nextSong.audio_url || '',
             nextSong.video_id || ''
         );
-        showToast(`Memutar: ${nextSong.title} - ${nextSong.artist}`, 'info');
     }
 }
 
@@ -2883,17 +2868,25 @@ function removeSongFromPlaylist(playlistId, songId) {
 }
 
 function deletePlaylist(playlistId) {
-    if (!confirm('Apakah Anda yakin ingin menghapus playlist ini?')) return;
-    const csrf = document.querySelector('meta[name="csrf-token"]').content;
-    fetch(`/api/playlists/${playlistId}`, {
-        method: 'DELETE',
-        headers: { 'X-CSRF-TOKEN': csrf }
-    })
-    .then(res => res.json())
-    .then(data => {
-        showToast(data.message);
-        showSection('playlists');
-        loadPlaylists();
+    showConfirmAlert({
+        title: 'Hapus Playlist',
+        description: 'Apakah Anda yakin ingin menghapus playlist ini?',
+        confirmText: 'Hapus',
+        cancelText: 'Batal',
+        variant: 'warning',
+        onConfirm: () => {
+            const csrf = document.querySelector('meta[name="csrf-token"]').content;
+            fetch(`/api/playlists/${playlistId}`, {
+                method: 'DELETE',
+                headers: { 'X-CSRF-TOKEN': csrf }
+            })
+            .then(res => res.json())
+            .then(data => {
+                showToast(data.message || 'Playlist berhasil dihapus!', 'success');
+                showSection('playlists');
+                loadPlaylists();
+            });
+        }
     });
 }
 
@@ -3108,35 +3101,160 @@ function handleUpdateReviewSubmit(e) {
 }
 
 function deleteReview(id) {
-    if (!confirm('Apakah Anda yakin ingin menghapus ulasan ini dari database?')) return;
-    const csrf = document.querySelector('meta[name="csrf-token"]').content;
-    fetch(`/api/reviews/${id}`, {
-        method: 'DELETE',
-        headers: {
-            'X-CSRF-TOKEN': csrf,
-            'Accept': 'application/json'
+    showConfirmAlert({
+        title: 'Hapus Ulasan',
+        description: 'Apakah Anda yakin ingin menghapus ulasan ini dari database?',
+        confirmText: 'Hapus',
+        cancelText: 'Batal',
+        variant: 'warning',
+        onConfirm: () => {
+            const csrf = document.querySelector('meta[name="csrf-token"]').content;
+            fetch(`/api/reviews/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': csrf,
+                    'Accept': 'application/json'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                showToast(data.message || 'Ulasan berhasil dihapus dari database!', 'success');
+                loadReviews();
+                if (currentDetailSong) {
+                    refreshModalSongReviews(currentDetailSong.id);
+                }
+                if (typeof fetchMusics === 'function') fetchMusics();
+                refreshHomepageRecentReviews();
+            })
+            .catch(err => {
+                console.error(err);
+                showToast('Gagal menghapus ulasan.', 'error');
+            });
         }
-    })
-    .then(res => res.json())
-    .then(data => {
-        showToast(data.message || 'Ulasan berhasil dihapus dari database!');
-        loadReviews();
-        if (currentDetailSong) {
-            refreshModalSongReviews(currentDetailSong.id);
-        }
-        if (typeof fetchMusics === 'function') fetchMusics();
-        refreshHomepageRecentReviews();
-    })
-    .catch(err => {
-        console.error(err);
-        showToast('Gagal menghapus ulasan.', 'error');
     });
 }
 
-/* ==================== 9. TOAST NOTIFICATION (DISABLED) ==================== */
-function showToast() {
+/* ==================== 9. SHADCN ALERT NOTIFICATION & CONFIRMATION ==================== */
+let toastTimeoutId = null;
+
+function showToast(message, type = 'success') {
+    if (!message) return;
+
     const existing = document.getElementById('minimaToast');
     if (existing) existing.remove();
+    if (toastTimeoutId) clearTimeout(toastTimeoutId);
+
+    const variantStyles = {
+        default: 'border-slate-800 bg-slate-950 text-slate-100',
+        success: 'border-emerald-500/50 bg-slate-950 text-slate-100',
+        warning: 'border-amber-500/50 bg-slate-950 text-amber-500',
+        error: 'border-red-500/50 bg-slate-950 text-red-500',
+        info: 'border-blue-500/50 bg-slate-950 text-blue-500'
+    };
+
+    const icons = {
+        success: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-500"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>',
+        error: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-red-500"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>',
+        warning: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-amber-500"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>',
+        info: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>'
+    };
+
+    const variantClass = variantStyles[type] || variantStyles.success;
+    const iconSvg = icons[type] || icons.success;
+
+    const alertEl = document.createElement('div');
+    alertEl.id = 'minimaToast';
+    alertEl.setAttribute('role', 'alert');
+    alertEl.className = `fixed top-20 right-6 z-[100] w-auto min-w-[260px] max-w-[400px] rounded-lg border px-4 py-3 shadow-lg shadow-black/25 backdrop-blur-md transition-all duration-200 opacity-0 -translate-y-2 ${variantClass}`;
+    alertEl.innerHTML = `
+        <div class="flex items-center gap-2">
+            <div class="grow flex items-center">
+                <span class="me-3 inline-flex shrink-0">${iconSvg}</span>
+                <p class="text-sm font-medium text-slate-100">${escapeHtml(message)}</p>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(alertEl);
+    requestAnimationFrame(() => {
+        alertEl.classList.remove('opacity-0', '-translate-y-2');
+        alertEl.classList.add('opacity-100', 'translate-y-0');
+    });
+
+    toastTimeoutId = setTimeout(() => {
+        alertEl.classList.remove('opacity-100', 'translate-y-0');
+        alertEl.classList.add('opacity-0', '-translate-y-2');
+        setTimeout(() => alertEl.remove(), 200);
+    }, 2800);
+}
+
+function showConfirmAlert({
+    title = 'Konfirmasi',
+    description = 'Apakah Anda yakin ingin melanjutkan?',
+    confirmText = 'Ya, Lanjutkan',
+    cancelText = 'Batal',
+    variant = 'warning',
+    onConfirm = null
+} = {}) {
+    const existing = document.getElementById('minimaConfirmBackdrop');
+    if (existing) existing.remove();
+
+    const borderClass = variant === 'error' ? 'border-red-500/50' : 'border-amber-500/50';
+    const iconColorClass = variant === 'error' ? 'text-red-500' : 'text-amber-500';
+
+    const backdrop = document.createElement('div');
+    backdrop.id = 'minimaConfirmBackdrop';
+    backdrop.className = 'fixed inset-0 z-[100] bg-black/50 backdrop-blur-[2px] flex items-start justify-center pt-24 px-4 transition-opacity duration-150 opacity-0';
+    backdrop.innerHTML = `
+        <div role="alert" class="relative rounded-lg border ${borderClass} z-[101] w-full max-w-[400px] bg-slate-950 p-4 shadow-lg shadow-black/30 transition-transform duration-150 scale-95">
+            <div class="flex gap-2">
+                <div class="flex grow gap-3">
+                    <span class="mt-0.5 shrink-0 ${iconColorClass}">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                    </span>
+                    <div class="grow space-y-1">
+                        <h5 class="text-sm font-medium text-slate-100">${escapeHtml(title)}</h5>
+                        <div class="text-sm text-slate-400 leading-relaxed">${escapeHtml(description)}</div>
+                        <div class="flex items-center justify-end gap-2 pt-3">
+                            <button type="button" id="minimaConfirmCancelBtn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-xs font-medium transition-colors border border-slate-800 bg-slate-900 text-slate-300 hover:bg-slate-800 hover:text-white h-8 px-3">
+                                ${escapeHtml(cancelText)}
+                            </button>
+                            <button type="button" id="minimaConfirmOkBtn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-xs font-medium transition-colors bg-red-600 text-white hover:bg-red-500 h-8 px-3">
+                                ${escapeHtml(confirmText)}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(backdrop);
+    const alertBox = backdrop.querySelector('[role="alert"]');
+
+    requestAnimationFrame(() => {
+        backdrop.classList.remove('opacity-0');
+        backdrop.classList.add('opacity-100');
+        if (alertBox) {
+            alertBox.classList.remove('scale-95');
+            alertBox.classList.add('scale-100');
+        }
+    });
+
+    const closeConfirm = () => {
+        backdrop.classList.remove('opacity-100');
+        backdrop.classList.add('opacity-0');
+        setTimeout(() => backdrop.remove(), 150);
+    };
+
+    backdrop.querySelector('#minimaConfirmCancelBtn').addEventListener('click', closeConfirm);
+    backdrop.addEventListener('click', (e) => {
+        if (e.target === backdrop) closeConfirm();
+    });
+    backdrop.querySelector('#minimaConfirmOkBtn').addEventListener('click', () => {
+        closeConfirm();
+        if (typeof onConfirm === 'function') onConfirm();
+    });
 }
 
 function escapeQuote(str) {
