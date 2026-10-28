@@ -16,6 +16,7 @@ Route::prefix('api')->group(function () {
     Route::get('/musics/{id}', [MusicController::class, 'show'])->name('api.musics.show');
     Route::get('/musics/{id}/audio', [MusicController::class, 'getRealAudio'])->name('api.musics.audio');
     Route::get('/musics/{id}/stream', [MusicController::class, 'streamAudio'])->name('api.musics.stream');
+    Route::get('/musics/{id}/lyrics', [MusicController::class, 'getLyrics'])->name('api.musics.lyrics');
     Route::match(['get', 'post'], '/musics/{id}/prepare-audio', [MusicController::class, 'prepareFullAudio'])->name('api.musics.prepareAudio');
     Route::get('/artists/{name}', [MusicController::class, 'showArtist'])->name('api.artists.show');
 

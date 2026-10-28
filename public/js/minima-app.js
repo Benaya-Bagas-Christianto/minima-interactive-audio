@@ -68,6 +68,7 @@ function initModalBackdropEvents() {
             if (e.target === modal) {
                 if (modal.id === 'musicModal') closeMusicModal();
                 else if (modal.id === 'vinylModal') closeVinylModal();
+                else if (modal.id === 'lyricsModal') closeLyricsModal();
                 else if (modal.id === 'videoModal') closeVideoModal();
                 else {
                     modal.classList.add('modal-closing');
@@ -87,6 +88,7 @@ function initModalBackdropEvents() {
             activeModals.forEach(m => {
                 if (m.id === 'musicModal') closeMusicModal();
                 else if (m.id === 'vinylModal') closeVinylModal();
+                else if (m.id === 'lyricsModal') closeLyricsModal();
                 else if (m.id === 'videoModal') closeVideoModal();
                 else {
                     m.classList.add('modal-closing');
@@ -101,15 +103,33 @@ function initModalBackdropEvents() {
 }
 
 /* ==================== 1. NAVIGATION & TABS ==================== */
-function initNavigation() {
-    const navButtonsContainer = document.getElementById('nav-buttons-container');
+function updateNavSlider(btn) {
     const slider = document.getElementById('nav-slider');
-    const homeBtn = document.querySelector('.nav-btn');
+    if (!slider || !btn) return;
+    slider.style.opacity = '1';
+    slider.style.top = `${btn.offsetTop}px`;
+    slider.style.left = `${btn.offsetLeft}px`;
+    slider.style.width = `${btn.offsetWidth}px`;
+    slider.style.height = `${btn.offsetHeight}px`;
+}
 
-    if (slider && homeBtn) {
-        slider.style.left = `${homeBtn.offsetLeft}px`;
-        slider.style.width = `${homeBtn.offsetWidth}px`;
+function initNavigation() {
+    const activeBtn = document.querySelector('.nav-btn.active') || document.querySelector('.nav-btn');
+    if (activeBtn) {
+        updateNavSlider(activeBtn);
+        // Pastikan ulang setelah font selesai dimuat agar ukuran 100% presisi
+        if (document.fonts && document.fonts.ready) {
+            document.fonts.ready.then(() => {
+                const currentActive = document.querySelector('.nav-btn.active') || activeBtn;
+                updateNavSlider(currentActive);
+            });
+        }
     }
+
+    window.addEventListener('resize', () => {
+        const currentActive = document.querySelector('.nav-btn.active');
+        if (currentActive) updateNavSlider(currentActive);
+    });
 }
 
 let sectionTransitionTimer = null;
@@ -121,7 +141,6 @@ function showSection(sectionId, clickedBtn) {
     const current = document.querySelector('.section.active');
 
     // Update navbar buttons & slider immediately for instant, springy visual response
-    const slider = document.getElementById('nav-slider');
     const allBtns = document.querySelectorAll('.nav-btn');
     allBtns.forEach(btn => btn.classList.remove('active', 'text-white'));
 
@@ -134,16 +153,9 @@ function showSection(sectionId, clickedBtn) {
         else if (sectionId === 'about') clickedBtn = document.getElementById('btn-about') || allBtns[4];
     }
 
-    if (clickedBtn && slider) {
+    if (clickedBtn) {
         clickedBtn.classList.add('active', 'text-white');
-        slider.style.opacity = '1';
-        slider.style.left = `${clickedBtn.offsetLeft}px`;
-        slider.style.width = `${clickedBtn.offsetWidth}px`;
-    }
-
-    if (sectionId === 'about') {
-        const aboutBtn = document.getElementById('btn-about');
-        if (aboutBtn && slider) slider.style.opacity = '0';
+        updateNavSlider(clickedBtn);
     }
 
     // Jika sudah di section yang sama, cukup scroll ke atas dengan mulus
@@ -277,6 +289,11 @@ function updateProgressBarVisual(percent) {
         vinylProgressBar.value = p;
         vinylProgressBar.style.background = `linear-gradient(to right, #10b981 0%, #10b981 ${p}%, #334155 ${p}%, #334155 100%)`;
     }
+    const lyricsProgressBar = document.getElementById('lyricsProgressBar');
+    if (lyricsProgressBar) {
+        lyricsProgressBar.value = p;
+        lyricsProgressBar.style.background = `linear-gradient(to right, #10b981 0%, #10b981 ${p}%, #334155 ${p}%, #334155 100%)`;
+    }
 }
 
 function updateTimeDisplays(cur, dur) {
@@ -286,17 +303,22 @@ function updateTimeDisplays(cur, dur) {
     const durTime = document.getElementById('playerDuration');
     const vinylCur = document.getElementById('vinylCurrentTime');
     const vinylDur = document.getElementById('vinylDuration');
+    const lyricsCur = document.getElementById('lyricsCurrentTime');
+    const lyricsDur = document.getElementById('lyricsDuration');
 
     if (curTime) curTime.textContent = curStr;
     if (durTime) durTime.textContent = durStr;
     if (vinylCur) vinylCur.textContent = curStr;
     if (vinylDur) vinylDur.textContent = durStr;
+    if (lyricsCur) lyricsCur.textContent = curStr;
+    if (lyricsDur) lyricsDur.textContent = durStr;
 }
 
 function startYtProgressTimer() {
     stopYtProgressTimer();
     const progressBar = document.getElementById('playerProgressBar');
     const vinylProgressBar = document.getElementById('vinylProgressBar');
+    const lyricsProgressBar = document.getElementById('lyricsProgressBar');
 
     ytProgressTimer = setInterval(() => {
         if (!isSeekingAudio && ytAudioPlayer && isYtReady && isAudioPlaying) {
@@ -307,12 +329,14 @@ function startYtProgressTimer() {
                     const progress = (cur / dur) * 100;
                     if (progressBar) progressBar.value = progress;
                     if (vinylProgressBar) vinylProgressBar.value = progress;
+                    if (lyricsProgressBar) lyricsProgressBar.value = progress;
                     updateProgressBarVisual(progress);
                     updateTimeDisplays(cur, dur);
+                    syncActiveLyricLine(cur);
                 }
             } catch (e) {}
         }
-    }, 250);
+    }, 200);
 }
 
 function stopYtProgressTimer() {
@@ -326,14 +350,17 @@ function initAudioPlayer() {
     const audio = document.getElementById('globalAudioPlayer');
     const progressBar = document.getElementById('playerProgressBar');
     const vinylProgressBar = document.getElementById('vinylProgressBar');
+    const lyricsProgressBar = document.getElementById('lyricsProgressBar');
 
     audio.addEventListener('timeupdate', () => {
         if (!isSeekingAudio && currentPlaybackMode === 'html5' && audio.duration) {
             const progress = (audio.currentTime / audio.duration) * 100;
             if (progressBar) progressBar.value = progress;
             if (vinylProgressBar) vinylProgressBar.value = progress;
+            if (lyricsProgressBar) lyricsProgressBar.value = progress;
             updateProgressBarVisual(progress);
             updateTimeDisplays(audio.currentTime, audio.duration);
+            syncActiveLyricLine(audio.currentTime);
         }
     });
 
@@ -378,6 +405,7 @@ function initAudioPlayer() {
             if (duration > 0) {
                 const targetSec = (percent / 100) * duration;
                 updateTimeDisplays(targetSec, duration);
+                syncActiveLyricLine(targetSec, true);
             }
         };
 
@@ -405,6 +433,7 @@ function initAudioPlayer() {
 
     attachSeekEvents(progressBar);
     attachSeekEvents(vinylProgressBar);
+    attachSeekEvents(lyricsProgressBar);
 }
 
 function isLocalFullAudio(url) {
@@ -657,6 +686,8 @@ function closeAudioPlayer() {
     const curTime = document.getElementById('playerCurrentTime');
     const vinylProgressBar = document.getElementById('vinylProgressBar');
     const vinylCurTime = document.getElementById('vinylCurrentTime');
+    const lyricsProgressBar = document.getElementById('lyricsProgressBar');
+    const lyricsCurTime = document.getElementById('lyricsCurrentTime');
     if (progressBar) {
         progressBar.value = 0;
         updateProgressBarVisual(0);
@@ -664,8 +695,12 @@ function closeAudioPlayer() {
     if (vinylProgressBar) {
         vinylProgressBar.value = 0;
     }
+    if (lyricsProgressBar) {
+        lyricsProgressBar.value = 0;
+    }
     if (curTime) curTime.textContent = '0:00';
     if (vinylCurTime) vinylCurTime.textContent = '0:00';
+    if (lyricsCurTime) lyricsCurTime.textContent = '0:00';
 
     // 6. Sembunyikan bottom player bar dengan animasi mulus
     const playerBar = document.getElementById('bottomAudioPlayer');
@@ -685,6 +720,8 @@ function updatePlayIcons(playing) {
     const pauseIcon = document.getElementById('pauseIcon');
     const vinylPlayIcon = document.getElementById('vinylModalPlayIcon');
     const vinylPauseIcon = document.getElementById('vinylModalPauseIcon');
+    const lyricsPlayIcon = document.getElementById('lyricsModalPlayIcon');
+    const lyricsPauseIcon = document.getElementById('lyricsModalPauseIcon');
     const vinylBadge = document.getElementById('vinylStatusBadge');
 
     if (playing) {
@@ -692,6 +729,8 @@ function updatePlayIcons(playing) {
         if (pauseIcon) pauseIcon.classList.remove('hidden');
         if (vinylPlayIcon) vinylPlayIcon.classList.add('hidden');
         if (vinylPauseIcon) vinylPauseIcon.classList.remove('hidden');
+        if (lyricsPlayIcon) lyricsPlayIcon.classList.add('hidden');
+        if (lyricsPauseIcon) lyricsPauseIcon.classList.remove('hidden');
         if (vinylBadge) {
             vinylBadge.textContent = 'Status: Berputar (Playing)';
             vinylBadge.className = 'px-3 py-1.5 rounded-full bg-emerald-950 text-emerald-400 font-semibold border border-emerald-800 text-xs shadow';
@@ -701,6 +740,8 @@ function updatePlayIcons(playing) {
         if (pauseIcon) pauseIcon.classList.add('hidden');
         if (vinylPlayIcon) vinylPlayIcon.classList.remove('hidden');
         if (vinylPauseIcon) vinylPauseIcon.classList.add('hidden');
+        if (lyricsPlayIcon) lyricsPlayIcon.classList.remove('hidden');
+        if (lyricsPauseIcon) lyricsPauseIcon.classList.add('hidden');
         if (vinylBadge) {
             vinylBadge.textContent = 'Status: Berhenti (Paused)';
             vinylBadge.className = 'px-3 py-1.5 rounded-full bg-slate-800 text-slate-400 font-semibold border border-slate-700 text-xs shadow';
@@ -718,8 +759,8 @@ function seekAudio(percent) {
             if (dur > 0) {
                 const targetSec = (val / 100) * dur;
                 ytAudioPlayer.seekTo(targetSec, true);
-                const curTime = document.getElementById('playerCurrentTime');
-                if (curTime) curTime.textContent = formatTime(targetSec);
+                updateTimeDisplays(targetSec, dur);
+                syncActiveLyricLine(targetSec, true);
                 return;
             }
         } catch (e) {}
@@ -729,8 +770,8 @@ function seekAudio(percent) {
     if (audio && audio.duration) {
         const targetSec = (val / 100) * audio.duration;
         audio.currentTime = targetSec;
-        const curTime = document.getElementById('playerCurrentTime');
-        if (curTime) curTime.textContent = formatTime(targetSec);
+        updateTimeDisplays(targetSec, audio.duration);
+        syncActiveLyricLine(targetSec, true);
     }
 }
 
@@ -1302,18 +1343,28 @@ function updateVinylTexture(imageUrl) {
     );
 }
 
-// Sinkronisasi seluruh informasi visual 3D Vinyl (judul, artis, kover, tekstur piringan) secara terpusat
+// Sinkronisasi seluruh informasi visual 3D Vinyl & Live Lyrics (judul, artis, kover, tekstur piringan) secara terpusat
 function updateVinylDisplay(title, artist, cover) {
     const finalCover = normalizeImageUrl(cover);
     const vinylTitle = document.getElementById('vinylSongTitle');
     const vinylArtist = document.getElementById('vinylSongArtist');
     const vinylCover = document.getElementById('vinylModalCover');
+    const lyricsTitle = document.getElementById('lyricsSongTitle');
+    const lyricsArtist = document.getElementById('lyricsSongArtist');
+    const lyricsCover = document.getElementById('lyricsModalCover');
 
     if (vinylTitle) vinylTitle.textContent = title || 'Putar Musik';
     if (vinylArtist) vinylArtist.textContent = artist || '-';
     if (vinylCover) vinylCover.src = finalCover;
+    if (lyricsTitle) lyricsTitle.textContent = title || 'Putar Musik';
+    if (lyricsArtist) lyricsArtist.textContent = artist || '-';
+    if (lyricsCover) lyricsCover.src = finalCover;
 
     updateVinylTexture(finalCover);
+
+    if (currentSong) {
+        loadSongLyrics(currentSong);
+    }
 }
 
 function onWindowResize() {
@@ -1366,6 +1417,420 @@ function openVinylWithSong(title, artist, cover, id, audioUrl, videoId) {
 
     // 2. Buka modal piringan hitam 3D
     openVinylModal();
+}
+
+/* ==================== 3.5 LIVE SYNCED LYRICS MODAL (SPOTIFY / YT MUSIC STYLE) ==================== */
+window.lyricsCache = window.lyricsCache || {};
+let currentLyricsLines = [];
+let currentLyricsSongId = null;
+let activeLyricIndex = -1;
+let lyricsTimeOffset = 0; // dalam detik (bisa dikalibrasi -0.5s / +0.5s oleh user)
+let lyricsSyncInterval = null;
+let activeLyricsRequestId = 0;
+
+function openLyricsWithSong(title, artist, cover, id, audioUrl, videoId) {
+    const finalCover = normalizeImageUrl(cover);
+
+    // 1. Putar lagu langsung jika belum diputar atau berbeda lagu
+    if (id && (!currentSong || currentSong.id !== id || !isAudioPlaying)) {
+        playSong(id, title, artist, finalCover, audioUrl, videoId);
+    } else if (!currentSong) {
+        currentSong = { id: id || 1, title, artist, cover: finalCover, audioUrl, videoId };
+        updateVinylDisplay(title, artist, finalCover);
+    }
+
+    // 2. Buka modal Live Synced Lyrics
+    openLyricsModal();
+}
+
+function openLyricsModal() {
+    const modal = document.getElementById('lyricsModal');
+    if (!modal) return;
+
+    modal.classList.remove('modal-closing');
+    modal.classList.add('active');
+    lockBodyScroll();
+
+    if (!currentSong) {
+        // Jika belum ada lagu yang dipilih, ambil lagu pertama dari antrean atau Bohemian Rhapsody
+        if (currentSongQueue && currentSongQueue.length > 0) {
+            const first = currentSongQueue[0];
+            playSong(first.id, first.title, first.artist, first.image ? (first.image.startsWith('/') ? first.image : '/' + first.image) : '/image/queen1.jpg', first.audio_url || '', first.video_id || '');
+        } else {
+            playSong(1, 'Bohemian Rhapsody', 'Queen', '/image/queen1.jpg', '/audio/1.mp3', 'fJ9rUzIMcZQ');
+        }
+    } else {
+        const lyricsTitle = document.getElementById('lyricsSongTitle');
+        const lyricsArtist = document.getElementById('lyricsSongArtist');
+        const lyricsCover = document.getElementById('lyricsModalCover');
+        if (lyricsTitle) lyricsTitle.textContent = currentSong.title || 'Putar Musik';
+        if (lyricsArtist) lyricsArtist.textContent = currentSong.artist || '-';
+        if (lyricsCover) lyricsCover.src = normalizeImageUrl(currentSong.cover);
+
+        if (currentLyricsSongId !== currentSong.id || currentLyricsLines.length === 0) {
+            loadSongLyrics(currentSong);
+        } else {
+            syncActiveLyricLine(getCurrentAudioTime(), true);
+        }
+    }
+
+    startLyricsSyncLoop();
+}
+
+function closeLyricsModal() {
+    const modal = document.getElementById('lyricsModal');
+    if (!modal || !modal.classList.contains('active')) return;
+    stopLyricsSyncLoop();
+    modal.classList.add('modal-closing');
+    setTimeout(() => {
+        modal.classList.remove('active', 'modal-closing');
+        unlockBodyScroll();
+    }, 220);
+}
+
+function getCurrentAudioTime() {
+    if (currentPlaybackMode === 'youtube' && ytAudioPlayer && isYtReady) {
+        try {
+            return ytAudioPlayer.getCurrentTime() || 0;
+        } catch (e) {}
+    }
+    const audio = document.getElementById('globalAudioPlayer');
+    if (audio && !isNaN(audio.currentTime)) {
+        return audio.currentTime || 0;
+    }
+    return 0;
+}
+
+function getCurrentAudioDuration() {
+    if (currentPlaybackMode === 'youtube' && ytAudioPlayer && isYtReady) {
+        try {
+            const d = ytAudioPlayer.getDuration();
+            if (d && d > 0) return d;
+        } catch (e) {}
+    }
+    const audio = document.getElementById('globalAudioPlayer');
+    if (audio && audio.duration && !isNaN(audio.duration)) {
+        return audio.duration;
+    }
+    if (currentSong && currentSong.id && window.songDataCache && window.songDataCache[currentSong.id]) {
+        const dStr = window.songDataCache[currentSong.id].duration;
+        if (dStr && dStr.includes(':')) {
+            const parts = dStr.split(':');
+            return (parseInt(parts[0]) || 0) * 60 + (parseInt(parts[1]) || 0);
+        }
+    }
+    return 210;
+}
+
+function startLyricsSyncLoop() {
+    stopLyricsSyncLoop();
+    lyricsSyncInterval = setInterval(() => {
+        const modal = document.getElementById('lyricsModal');
+        if (!modal || !modal.classList.contains('active')) {
+            stopLyricsSyncLoop();
+            return;
+        }
+        if (isAudioPlaying && !isSeekingAudio) {
+            syncActiveLyricLine(getCurrentAudioTime(), false);
+        }
+    }, 80);
+}
+
+function stopLyricsSyncLoop() {
+    if (lyricsSyncInterval) {
+        clearInterval(lyricsSyncInterval);
+        lyricsSyncInterval = null;
+    }
+}
+
+function adjustLyricsOffset(delta) {
+    lyricsTimeOffset = Math.round((lyricsTimeOffset + delta) * 10) / 10;
+    const label = document.getElementById('lyricsOffsetLabel');
+    if (label) {
+        label.textContent = `${lyricsTimeOffset > 0 ? '+' : ''}${lyricsTimeOffset.toFixed(1)}s`;
+    }
+    syncActiveLyricLine(getCurrentAudioTime(), true);
+}
+
+function parseLrcLyrics(lrcText, plainText, totalDuration) {
+    const lines = [];
+    if (lrcText && typeof lrcText === 'string') {
+        const rawLines = lrcText.split(/\r?\n/);
+        const timeRegex = /\[(\d{1,2}):(\d{2})(?:\.(\d{1,3}))?\]/g;
+
+        rawLines.forEach(raw => {
+            const matches = [...raw.matchAll(timeRegex)];
+            if (matches.length > 0) {
+                const text = raw.replace(timeRegex, '').trim();
+                matches.forEach(m => {
+                    const mins = parseInt(m[1], 10) || 0;
+                    const secs = parseInt(m[2], 10) || 0;
+                    let ms = 0;
+                    if (m[3]) {
+                        ms = parseInt(m[3].padEnd(3, '0').slice(0, 3), 10) / 1000;
+                    }
+                    const timeSec = mins * 60 + secs + ms;
+                    lines.push({
+                        time: timeSec,
+                        text: text || '♪ • • • ♪',
+                        isInstrumental: !text
+                    });
+                });
+            }
+        });
+
+        lines.sort((a, b) => a.time - b.time);
+
+        // Jika baris lirik pertama baru mulai di atas detik ke-4, tambahkan baris Intro di 0.0s
+        if (lines.length > 0 && lines[0].time > 4.0) {
+            lines.unshift({
+                time: 0,
+                text: '♪ Intro Musik ♪',
+                isInstrumental: true
+            });
+        }
+    }
+
+    if (lines.length === 0 && plainText && typeof plainText === 'string') {
+        const rawPlain = plainText.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+        const dur = totalDuration > 30 ? totalDuration : 200;
+        const step = Math.max(3.5, (dur - 12) / Math.max(1, rawPlain.length));
+        lines.push({ time: 0, text: '♪ Intro Musik ♪', isInstrumental: true });
+        rawPlain.forEach((txt, idx) => {
+            lines.push({
+                time: Math.round((5 + idx * step) * 10) / 10,
+                text: txt,
+                isInstrumental: false
+            });
+        });
+    }
+
+    return lines;
+}
+
+function loadSongLyrics(song) {
+    if (!song || !song.title) return;
+    const container = document.getElementById('lyricsScrollContainer');
+    const badge = document.getElementById('lyricsSyncBadge');
+
+    lyricsTimeOffset = 0;
+    const offsetLabel = document.getElementById('lyricsOffsetLabel');
+    if (offsetLabel) offsetLabel.textContent = '0.0s';
+
+    const cacheKey = song.id || `${song.title}_${song.artist}`;
+    if (window.lyricsCache[cacheKey]) {
+        applyLyricsPayload(window.lyricsCache[cacheKey], song);
+        return;
+    }
+
+    if (container) {
+        container.innerHTML = `
+            <div class="py-16 flex flex-col items-center justify-center text-slate-400">
+                <div class="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mb-3"></div>
+                <p class="text-xs font-medium">Menyinkronkan lirik asli untuk <span class="text-white font-semibold">${escapeHtml(song.title)}</span>...</p>
+            </div>
+        `;
+    }
+
+    const reqId = ++activeLyricsRequestId;
+    const dur = Math.round(getCurrentAudioDuration() || 0);
+
+    const apiUrl = song.id
+        ? `/api/musics/${song.id}/lyrics?duration=${dur}`
+        : `https://lrclib.net/api/search?q=${encodeURIComponent(song.title + ' ' + song.artist)}`;
+
+    fetch(apiUrl)
+        .then(res => res.json())
+        .then(data => {
+            if (reqId !== activeLyricsRequestId) return;
+
+            // Jika response dari endpoint Laravel kita
+            if (data && (data.syncedLyrics || data.plainLyrics)) {
+                window.lyricsCache[cacheKey] = data;
+                applyLyricsPayload(data, song);
+                return;
+            }
+
+            // Fallback langsung ke LRCLIB dari browser jika diperlukan
+            const cleanTitle = song.title.replace(/\s*[\(\[].*?[\)\]]/g, '').trim();
+            const cleanArtist = (song.artist || '').replace(/\s+(ft\.?|feat\.?|featuring|&|x|with)\s+.*$/i, '').trim();
+            return fetch(`https://lrclib.net/api/search?q=${encodeURIComponent(cleanTitle + ' ' + cleanArtist)}`)
+                .then(r => r.json())
+                .then(list => {
+                    if (reqId !== activeLyricsRequestId) return;
+                    if (Array.isArray(list) && list.length > 0) {
+                        const syncedList = list.filter(item => item.syncedLyrics);
+                        const chosen = syncedList.length > 0 ? syncedList[0] : list[0];
+                        const payload = {
+                            id: song.id,
+                            title: song.title,
+                            artist: song.artist,
+                            synced: Boolean(chosen.syncedLyrics),
+                            syncedLyrics: chosen.syncedLyrics || null,
+                            plainLyrics: chosen.plainLyrics || null
+                        };
+                        window.lyricsCache[cacheKey] = payload;
+                        applyLyricsPayload(payload, song);
+                    } else {
+                        applyLyricsPayload({ synced: false, syncedLyrics: null, plainLyrics: null }, song);
+                    }
+                });
+        })
+        .catch(() => {
+            if (reqId !== activeLyricsRequestId) return;
+            if (badge) badge.textContent = 'Instrumental / Info';
+            applyLyricsPayload({ synced: false, syncedLyrics: null, plainLyrics: null }, song);
+        });
+}
+
+function applyLyricsPayload(payload, song) {
+    currentLyricsSongId = song.id;
+    const badge = document.getElementById('lyricsSyncBadge');
+    const dur = getCurrentAudioDuration();
+
+    currentLyricsLines = parseLrcLyrics(payload.syncedLyrics, payload.plainLyrics, dur);
+
+    if (badge) {
+        if (payload.syncedLyrics) {
+            badge.textContent = 'Live Synced • Akurat';
+            badge.className = 'text-emerald-400 text-[11px] font-semibold px-2.5 py-0.5 bg-emerald-950/80 border border-emerald-500/30 rounded-full';
+        } else if (payload.plainLyrics) {
+            badge.textContent = 'Auto-Scroll Lyrics';
+            badge.className = 'text-amber-400 text-[11px] font-semibold px-2.5 py-0.5 bg-amber-950/80 border border-amber-500/30 rounded-full';
+        } else {
+            badge.textContent = 'Instrumental / Tanpa Lirik';
+            badge.className = 'text-slate-400 text-[11px] font-semibold px-2.5 py-0.5 bg-slate-800 border border-slate-700 rounded-full';
+        }
+    }
+
+    renderLyricsLines(song);
+    activeLyricIndex = -1;
+    syncActiveLyricLine(getCurrentAudioTime(), true);
+}
+
+function renderLyricsLines(song) {
+    const container = document.getElementById('lyricsScrollContainer');
+    if (!container) return;
+
+    if (!currentLyricsLines || currentLyricsLines.length === 0) {
+        container.innerHTML = `
+            <div class="py-14 px-4 text-center space-y-2">
+                <div class="text-3xl mb-2">🎷</div>
+                <p class="text-white font-bold text-base">${escapeHtml(song.title)} — ${escapeHtml(song.artist)}</p>
+                <p class="text-slate-400 text-xs max-w-md mx-auto leading-relaxed">
+                    Komposisi ini merupakan karya instrumental atau lirik berwaktu belum tersedia untuk lagu ini. Nikmati alunan instrumen musiknya!
+                </p>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = currentLyricsLines.map((line, index) => `
+        <div id="lyric-line-${index}"
+             onclick="seekToLyricTime(${line.time})"
+             class="lyric-line cursor-pointer px-4 py-2 rounded-xl transition-colors duration-200 flex items-center justify-center text-slate-500 hover:text-slate-300">
+            <p class="lyric-text text-center font-semibold text-base sm:text-lg leading-snug transition-all duration-200 text-slate-500 ${line.isInstrumental ? 'italic tracking-widest' : ''}">
+                ${escapeHtml(line.text)}
+            </p>
+        </div>
+    `).join('');
+}
+
+function syncActiveLyricLine(currentSeconds, forceInstantScroll = false) {
+    if (!currentLyricsLines || currentLyricsLines.length === 0) return;
+
+    // Waktu efektif dengan antisipasi 0.22 detik agar highlight lirik tepat bersamaan saat penyanyi mulai membuka suara
+    const effectiveTime = Math.max(0, (parseFloat(currentSeconds) || 0) - lyricsTimeOffset + 0.22);
+
+    let newIndex = 0;
+    for (let i = 0; i < currentLyricsLines.length; i++) {
+        if (effectiveTime >= currentLyricsLines[i].time) {
+            newIndex = i;
+        } else {
+            break;
+        }
+    }
+
+    if (newIndex === activeLyricIndex && !forceInstantScroll) {
+        return;
+    }
+
+    activeLyricIndex = newIndex;
+    const container = document.getElementById('lyricsScrollContainer');
+    if (!container) return;
+
+    currentLyricsLines.forEach((_, idx) => {
+        const el = document.getElementById(`lyric-line-${idx}`);
+        if (!el) return;
+        const textEl = el.querySelector('.lyric-text');
+
+        if (idx === activeLyricIndex) {
+            el.className = 'lyric-line active-lyric-line cursor-pointer px-4 py-2.5 rounded-xl transition-colors duration-200 flex items-center justify-center';
+            if (textEl) {
+                textEl.className = 'lyric-text text-center font-black text-xl sm:text-2xl text-white scale-[1.03] leading-snug transition-all duration-200';
+            }
+        } else {
+            el.className = 'lyric-line cursor-pointer px-4 py-2 rounded-xl transition-colors duration-200 flex items-center justify-center group';
+            if (textEl) {
+                textEl.className = 'lyric-text text-center font-semibold text-base sm:text-lg text-slate-500 group-hover:text-slate-300 leading-snug transition-all duration-200';
+            }
+        }
+    });
+
+    // Auto-scroll baris lirik yang sedang dinyanyikan tepat ke tengah-tengah layar modal
+    const activeEl = document.getElementById(`lyric-line-${activeLyricIndex}`);
+    if (activeEl && container) {
+        const targetScrollTop = activeEl.offsetTop - (container.clientHeight / 2) + (activeEl.clientHeight / 2);
+        container.scrollTo({
+            top: Math.max(0, targetScrollTop),
+            behavior: forceInstantScroll ? 'auto' : 'smooth'
+        });
+    }
+}
+
+function seekToLyricTime(lyricTimeSec) {
+    const targetSec = Math.max(0, (parseFloat(lyricTimeSec) || 0) + lyricsTimeOffset);
+
+    if (currentPlaybackMode === 'youtube' && ytAudioPlayer && isYtReady) {
+        try {
+            const dur = ytAudioPlayer.getDuration() || getCurrentAudioDuration();
+            ytAudioPlayer.seekTo(targetSec, true);
+            if (!isAudioPlaying) {
+                ytAudioPlayer.playVideo();
+                isAudioPlaying = true;
+                updatePlayIcons(true);
+            }
+            if (dur > 0) {
+                const p = (targetSec / dur) * 100;
+                const progressBar = document.getElementById('playerProgressBar');
+                if (progressBar) progressBar.value = p;
+                updateProgressBarVisual(p);
+                updateTimeDisplays(targetSec, dur);
+            }
+            syncActiveLyricLine(targetSec, true);
+            return;
+        } catch (e) {}
+    }
+
+    const audio = document.getElementById('globalAudioPlayer');
+    if (audio) {
+        audio.currentTime = targetSec;
+        if (audio.paused) {
+            audio.play().then(() => {
+                isAudioPlaying = true;
+                updatePlayIcons(true);
+            }).catch(() => {});
+        }
+        const dur = audio.duration || getCurrentAudioDuration();
+        if (dur > 0) {
+            const p = (targetSec / dur) * 100;
+            const progressBar = document.getElementById('playerProgressBar');
+            if (progressBar) progressBar.value = p;
+            updateProgressBarVisual(p);
+            updateTimeDisplays(targetSec, dur);
+        }
+        syncActiveLyricLine(targetSec, true);
+    }
 }
 
 /* ==================== 4. VIDEO MV PLAYER MODAL ==================== */
@@ -1495,14 +1960,18 @@ function fetchMusics(page = 1, smoothScroll = false) {
             grid.innerHTML = songs.map((song, idx) => `
                 <div class="song-card-animated bg-slate-800/80 rounded-2xl p-4 border border-slate-700/60 hover:border-emerald-500/50 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-emerald-500/10 group shadow-lg flex flex-col justify-between" style="animation-delay: ${Math.min(idx * 22, 260)}ms;">
                     <div>
-                        <div class="relative overflow-hidden rounded-xl aspect-square mb-4 bg-slate-700">
+                        <div class="relative overflow-hidden rounded-xl aspect-square mb-4 bg-slate-700 cursor-pointer" onclick="openMusicModal(${song.id})">
                             <img src="${song.image ? '/' + song.image : '/image/queen1.jpg'}" alt="${song.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                            <!-- Overlay Play, 3D & Live Lyrics Buttons -->
                             <div class="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                                <button onclick="playSong(${song.id}, '${escapeQuote(song.title)}', '${escapeQuote(song.artist)}', '/${song.image || 'image/queen1.jpg'}', '${song.audio_url || ''}', '${song.video_id || ''}')" class="w-11 h-11 bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-full flex items-center justify-center font-bold shadow-xl transition-transform hover:scale-110" title="Putar Lagu">
+                                <button onclick="event.stopPropagation(); playSong(${song.id}, '${escapeQuote(song.title)}', '${escapeQuote(song.artist)}', '/${song.image || 'image/queen1.jpg'}', '${song.audio_url || ''}', '${song.video_id || ''}')" class="w-11 h-11 bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-full flex items-center justify-center font-bold shadow-xl transition-transform hover:scale-110" title="Putar Lagu">
                                     <svg class="w-5 h-5 fill-current translate-x-0.5" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                                 </button>
-                                <button onclick="openVinylWithSong('${escapeQuote(song.title)}', '${escapeQuote(song.artist)}', '/${song.image || 'image/queen1.jpg'}', ${song.id}, '${song.audio_url || ''}', '${song.video_id || ''}')" class="w-9 h-9 bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-emerald-500/40 rounded-full flex items-center justify-center shadow-xl transition-transform hover:scale-110" title="Putar di Piringan 3D">
-                                    <span class="text-xs font-black">3D</span>
+                                <button onclick="event.stopPropagation(); openVinylWithSong('${escapeQuote(song.title)}', '${escapeQuote(song.artist)}', '/${song.image || 'image/queen1.jpg'}', ${song.id}, '${song.audio_url || ''}', '${song.video_id || ''}')" class="w-9 h-9 bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-emerald-500/40 rounded-full flex items-center justify-center shadow-xl transition-transform hover:scale-110" title="Putar di Piringan 3D">
+                                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M16 3.937A9 9 0 1 0 21 12"/><path d="M11 12a1 1 0 1 0 2 0a1 1 0 1 0-2 0m8-8a1 1 0 1 0 2 0a1 1 0 1 0-2 0"/><path d="m20 4l-3.5 10l-2.5 2"/></g></svg>
+                                </button>
+                                <button onclick="event.stopPropagation(); openLyricsWithSong('${escapeQuote(song.title)}', '${escapeQuote(song.artist)}', '/${song.image || 'image/queen1.jpg'}', ${song.id}, '${song.audio_url || ''}', '${song.video_id || ''}')" class="w-9 h-9 bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-emerald-500/40 rounded-full flex items-center justify-center shadow-xl transition-transform hover:scale-110" title="Putar dengan Lirik">
+                                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M470.8 365.6c-.9-53.7-1.6-107.4-2.4-161.1c-.9-63.6-1.7-127.3-2.6-190.9c-.1-9.9-6.6-15.2-15.9-13.1c-25.8 5.9-51.7 11.7-77.5 17.5C306.7 32.7 241 47.5 175.3 62.2c-9.1 2-12.2 6.1-12.1 15.5c.2 7.5.3 14.9.4 22.4c1.3 90.7 2.5 181.4 3.7 272.1v9.8c-2.5-1.9-4.4-3.5-6.4-5c-17-12.6-36.1-17.4-56.9-14c-51.5 8.5-78.6 64.8-53.4 110.5c15.3 27.7 48.4 43.4 78.8 37.3c38-7.6 62.5-38.6 61.7-77.8c-.4-20.2-.8-40.4-1.1-60.7l-3-224.1c-.1-4.6 0-9.2 0-14c85.6-19.2 171.1-38.4 256.8-57.6c1.1 81.6 2.2 162.6 3.3 244.4c-1.7-1.3-2.6-2.1-3.6-2.9c-17.3-13.9-37.1-19.3-58.9-16c-54.2 8.2-83.1 71.4-49.5 117.3c17.9 24.4 42.6 35.1 72.6 30.4c30.3-4.8 50.1-23 59.9-52c3.6-10.6 3.4-21.4 3.2-32.2M115.6 489.4c-28.6.1-51.7-23.7-51.6-52.8s23.6-52.6 53-52.2c27.9.4 51.4 22.4 51.2 53.2c-.2 29.6-23.7 51.8-52.6 51.8m327.7-438c0 .9-2.1 2.3-3.4 2.6c-12.5 3-25 5.8-37.5 8.6c-20 4.5-40.1 8.9-60.1 13.4c-41.4 9.3-82.8 18.5-124.3 27.8c-9.6 2.2-19.3 4.3-28.9 6.5c-.6.1-1.2.1-3 .3c0-8.8-.1-17.4.2-25.9c0-.9 2.2-2.2 3.5-2.5c14.7-3.4 29.5-6.7 44.3-10c19.8-4.4 39.5-8.8 59.3-13.3l113.7-25.5c10.6-2.4 21.2-4.9 31.9-7.3c1.1-.2 2.2-.2 4.4-.4c.1 8.9.2 17.3-.1 25.7m-47.4 377c-28.1 0-52-24.1-52-52.4c0-28.6 23.8-52.7 52.1-52.7c28.9 0 52.3 23.7 52.3 53.1c-.2 28.3-24 52-52.4 52"/><path fill="currentColor" d="M64 436.6c.1-29.1 23.6-52.6 53-52.2c27.9.4 51.4 22.4 51.2 53.2c-.2 29.6-23.7 51.8-52.6 51.8c-28.6.1-51.7-23.7-51.6-52.8m384.2-60.2c0-29.4-23.3-53.1-52.3-53.1c-28.3 0-52.1 24.1-52.1 52.7c0 28.2 24 52.4 52 52.4c28.5 0 52.3-23.7 52.4-52m-259-266c9.6-2.2 19.3-4.3 28.9-6.5c41.4-9.3 82.8-18.6 124.3-27.8c20-4.5 40.1-8.9 60.1-13.4c12.5-2.8 25-5.6 37.5-8.6c1.3-.3 3.4-1.7 3.4-2.6c.3-8.4.2-16.9.2-25.8c-2.2.2-3.3.1-4.4.4c-10.6 2.4-21.2 4.9-31.9 7.3L293.6 58.9c-19.8 4.4-39.5 8.8-59.3 13.3c-14.8 3.3-29.5 6.6-44.3 10c-1.4.3-3.5 1.6-3.5 2.5c-.3 8.6-.2 17.1-.2 25.9c1.7-.1 2.3-.1 2.9-.2" opacity=".7"/></svg>
                                 </button>
                             </div>
                             <span class="absolute top-2.5 right-2.5 bg-black/70 backdrop-blur-md px-2 py-0.5 rounded-md text-xs font-bold text-yellow-400 border border-white/10">★ ${song.rating}</span>
@@ -2013,6 +2482,18 @@ function renderModalSongData(song) {
             const rawImg = song.image || 'image/queen1.jpg';
             const finalImg = rawImg.startsWith('http') || rawImg.startsWith('/') ? rawImg : '/' + rawImg;
             openVinylWithSong(song.title, song.artist, finalImg, song.id, song.audio_url, song.video_id);
+        };
+    }
+
+    const btnLyrics = document.getElementById('modalOpenLyricsBtn');
+    if (btnLyrics) {
+        btnLyrics.onclick = () => {
+            const rawImg = song.image || 'image/queen1.jpg';
+            const finalImg = rawImg.startsWith('http') || rawImg.startsWith('/') ? rawImg : '/' + rawImg;
+            closeMusicModal();
+            setTimeout(() => {
+                openLyricsWithSong(song.title, song.artist, finalImg, song.id, song.audio_url, song.video_id);
+            }, 180);
         };
     }
 
