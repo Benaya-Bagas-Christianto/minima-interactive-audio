@@ -313,33 +313,13 @@
                 <h3 class="text-3xl font-extrabold text-white mt-3 mb-2">Tim Pengembang (Kelompok 2)</h3>
                 <p class="text-slate-400 text-sm mb-10">Kelas 17.5A.27 • Universitas Bina Sarana Informatika</p>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 text-left">
-                    <!-- Paul Siagian -->
-                    <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-700/60 hover:border-emerald-500 transition-all hover:-translate-y-1">
-                        <div class="w-12 h-12 bg-emerald-900/40 text-emerald-400 rounded-full flex items-center justify-center font-bold mb-3 text-lg">
-                            PS
-                        </div>
-                        <h4 class="font-bold text-white text-sm">Paul Siagian</h4>
-                        <p class="text-xs text-slate-400">NIM: 17240668</p>
-                        <a href="https://instagram.com/ull_1141" target="_blank" class="text-[11px] text-emerald-400 hover:underline mt-2 inline-block">@ull_1141</a>
-                    </div>
-
-                    <!-- Arla Raesa Isalim -->
-                    <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-700/60 hover:border-emerald-500 transition-all hover:-translate-y-1">
-                        <div class="w-12 h-12 bg-pink-900/40 text-pink-400 rounded-full flex items-center justify-center font-bold mb-3 text-lg">
-                            AR
-                        </div>
-                        <h4 class="font-bold text-white text-sm">Arla Raesa Isalim</h4>
-                        <p class="text-xs text-slate-400">NIM: 17240410</p>
-                        <a href="https://instagram.com/arlarsa._" target="_blank" class="text-[11px] text-pink-400 hover:underline mt-2 inline-block">@arlarsa._</a>
-                    </div>
-
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-left">
                     <!-- Muhammad Surya Triabadi -->
                     <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-700/60 hover:border-emerald-500 transition-all hover:-translate-y-1">
                         <div class="w-12 h-12 bg-blue-900/40 text-blue-400 rounded-full flex items-center justify-center font-bold mb-3 text-lg">
                             MS
                         </div>
-                        <h4 class="font-bold text-white text-sm">M. Surya Triabadi</h4>
+                        <h4 class="font-bold text-white text-sm">Muhammad Surya Triabadi</h4>
                         <p class="text-xs text-slate-400">NIM: 17240151</p>
                         <a href="https://instagram.com/surrddawg" target="_blank" class="text-[11px] text-blue-400 hover:underline mt-2 inline-block">@surrddawg</a>
                     </div>
@@ -349,19 +329,29 @@
                         <div class="w-12 h-12 bg-purple-900/40 text-purple-400 rounded-full flex items-center justify-center font-bold mb-3 text-lg">
                             AM
                         </div>
-                        <h4 class="font-bold text-white text-sm">Al Muzamil S. R.</h4>
+                        <h4 class="font-bold text-white text-sm">Al Muzamil Sahri Ramadhan</h4>
                         <p class="text-xs text-slate-400">NIM: 17240641</p>
                         <a href="https://instagram.com/almzmlsahrii_" target="_blank" class="text-[11px] text-purple-400 hover:underline mt-2 inline-block">@almzmlsahrii_</a>
                     </div>
 
-                    <!-- Elrado Keni Sierra -->
+                    <!-- Benaya Bagas Christianto -->
+                    <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-700/60 hover:border-emerald-500 transition-all hover:-translate-y-1">
+                        <div class="w-12 h-12 bg-emerald-900/40 text-emerald-400 rounded-full flex items-center justify-center font-bold mb-3 text-lg">
+                            BB
+                        </div>
+                        <h4 class="font-bold text-white text-sm">Benaya Bagas Christianto</h4>
+                        <p class="text-xs text-slate-400">NIM: 17240313</p>
+                        <a href="https://www.instagram.com/nothingyoucanfoundhere/" target="_blank" class="text-[11px] text-emerald-400 hover:underline mt-2 inline-block">@nothingyoucanfoundhere</a>
+                    </div>
+
+                    <!-- Reihan Rismana -->
                     <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-700/60 hover:border-emerald-500 transition-all hover:-translate-y-1">
                         <div class="w-12 h-12 bg-amber-900/40 text-amber-400 rounded-full flex items-center justify-center font-bold mb-3 text-lg">
-                            EK
+                            RR
                         </div>
-                        <h4 class="font-bold text-white text-sm">Elrado Keni Sierra</h4>
-                        <p class="text-xs text-slate-400">NIM: 17240475</p>
-                        <a href="https://instagram.com/elradokenii" target="_blank" class="text-[11px] text-amber-400 hover:underline mt-2 inline-block">@elradokenii</a>
+                        <h4 class="font-bold text-white text-sm">Reihan Rismana</h4>
+                        <p class="text-xs text-slate-400">NIM: 17240196</p>
+                        <a href="https://www.instagram.com/rehanrismana/" target="_blank" class="text-[11px] text-amber-400 hover:underline mt-2 inline-block">@rehanrismana</a>
                     </div>
                 </div>
 
