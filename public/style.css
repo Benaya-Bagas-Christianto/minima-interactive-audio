@@ -680,3 +680,103 @@ body.modal-open {
     animation: minimaCardDeleteDissolve 0.44s cubic-bezier(0.22, 1, 0.36, 1) forwards !important;
     will-change: transform, opacity, filter;
 }
+
+/* ==================== GAMEVAULT SWEETALERT STYLE ==================== */
+@keyframes svg-stroke {
+    100% {
+        stroke-dashoffset: 0;
+    }
+}
+
+.svg-success-circle {
+    stroke-dasharray: 166;
+    stroke-dashoffset: 166;
+    stroke-width: 4;
+    stroke: #10b981;
+    animation: svg-stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+}
+
+.svg-success-check {
+    stroke-dasharray: 48;
+    stroke-dashoffset: 48;
+    stroke-width: 4;
+    stroke: #10b981;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    animation: svg-stroke 0.4s cubic-bezier(0.65, 0, 0.45, 1) 0.25s forwards;
+}
+
+.svg-warning-circle {
+    stroke-dasharray: 166;
+    stroke-dashoffset: 166;
+    stroke-width: 4;
+    stroke: #f59e0b;
+    animation: svg-stroke 0.55s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+}
+
+.svg-warning-mark {
+    stroke-dasharray: 48;
+    stroke-dashoffset: 48;
+    stroke-width: 4;
+    stroke: #f59e0b;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    animation: svg-stroke 0.4s cubic-bezier(0.65, 0, 0.45, 1) 0.2s forwards;
+}
+
+.svg-error-circle {
+    stroke-dasharray: 166;
+    stroke-dashoffset: 166;
+    stroke-width: 4;
+    stroke: #ef4444;
+    animation: svg-stroke 0.55s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+}
+
+.svg-error-cross {
+    stroke-dasharray: 48;
+    stroke-dashoffset: 48;
+    stroke-width: 4;
+    stroke: #ef4444;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    animation: svg-stroke 0.4s cubic-bezier(0.65, 0, 0.45, 1) 0.2s forwards;
+}
+
+#sweet-alert-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(2, 6, 23, 0.76);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 9000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#sweet-alert-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+}
+
+#sweet-alert-overlay .swal-modal-box {
+    background: #1e293b;
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    border-radius: 20px;
+    max-width: 360px;
+    width: 100%;
+    text-align: center;
+    padding: 40px 24px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+    transform: scale(0.9) translateY(12px);
+    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#sweet-alert-overlay.open .swal-modal-box {
+    transform: scale(1) translateY(0);
+}
+

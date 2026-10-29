@@ -3213,120 +3213,131 @@ function deleteReview(id) {
     });
 }
 
-/* ==================== 9. SHADCN ALERT NOTIFICATION & CONFIRMATION (MINIMA THEME) ==================== */
-let toastTimeoutId = null;
+/* ==================== 9. SWEETALERT NOTIFICATION & CONFIRMATION (GAMEVAULT STYLE) ==================== */
+function closeSweetAlert(callback = null) {
+    const overlay = document.getElementById('sweet-alert-overlay');
+    if (overlay) {
+        overlay.classList.remove('open');
+        const modal = overlay.querySelector('.swal-modal-box');
+        if (modal) modal.style.transform = 'scale(0.9) translateY(10px)';
+        setTimeout(() => {
+            overlay.remove();
+            if (typeof callback === 'function') callback();
+        }, 260);
+    } else if (typeof callback === 'function') {
+        callback();
+    }
+}
+
+function getSweetAlertIconHtml(type = 'success') {
+    if (type === 'warning') {
+        return `<svg class="svg-warning-circle" viewBox="-2 -2 56 56" style="width:72px; height:72px; display:inline-block; fill:none;">
+            <circle cx="26" cy="26" r="24" fill="none"/>
+            <path class="svg-warning-mark" fill="none" d="M26 14v13M26 35.5h.02"/>
+        </svg>`;
+    }
+    if (type === 'error') {
+        return `<svg class="svg-error-circle" viewBox="-2 -2 56 56" style="width:72px; height:72px; display:inline-block; fill:none;">
+            <circle cx="26" cy="26" r="24" fill="none"/>
+            <path class="svg-error-cross" fill="none" d="M18 18l16 16M34 18L18 34"/>
+        </svg>`;
+    }
+    return `<svg class="svg-success-circle" viewBox="-2 -2 56 56" style="width:72px; height:72px; display:inline-block; fill:none;">
+        <circle cx="26" cy="26" r="24" fill="none"/>
+        <path class="svg-success-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+    </svg>`;
+}
+
+function showSweetAlert(title, message, type = 'success') {
+    let overlay = document.getElementById('sweet-alert-overlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'sweet-alert-overlay';
+        document.body.appendChild(overlay);
+    }
+
+    const iconHtml = getSweetAlertIconHtml(type);
+
+    overlay.innerHTML = `
+        <div class="swal-modal-box">
+            <div style="font-size: 64px; margin-bottom: 24px;">
+                ${iconHtml}
+            </div>
+            <h3 style="font-size: 24px; font-weight: 800; margin: 0 0 12px 0; color: #ffffff;">${escapeHtml(title)}</h3>
+            <p style="color: #94a3b8; margin: 0 0 32px 0; line-height: 1.5; font-size: 15px;">${escapeHtml(message)}</p>
+            <button type="button" class="w-full py-3 px-4 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold rounded-xl text-sm transition-all duration-200 hover:scale-[1.02] active:scale-95 shadow-lg shadow-emerald-500/25 flex items-center justify-center" onclick="closeSweetAlert()">
+                OK
+            </button>
+        </div>
+    `;
+
+    overlay.onclick = function(e) {
+        if (e.target === overlay) closeSweetAlert();
+    };
+
+    void overlay.offsetWidth;
+    overlay.classList.add('open');
+}
 
 function showToast(message, type = 'success') {
     if (!message) return;
-
-    const existing = document.getElementById('minimaToast');
-    if (existing) existing.remove();
-    if (toastTimeoutId) clearTimeout(toastTimeoutId);
-
-    const variantStyles = {
-        default: 'border-slate-700 bg-slate-800/95 text-white',
-        success: 'border-emerald-500/40 bg-slate-800/95 text-white',
-        warning: 'border-emerald-500/40 bg-slate-800/95 text-white',
-        error: 'border-red-500/40 bg-slate-800/95 text-white',
-        info: 'border-emerald-500/40 bg-slate-800/95 text-white'
+    const titles = {
+        success: 'Berhasil!',
+        error: 'Gagal!',
+        warning: 'Perhatian!',
+        info: 'Informasi'
     };
-
-    const icons = {
-        success: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-400"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>',
-        error: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-red-400"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>',
-        warning: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-400"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>',
-        info: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-400"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>'
-    };
-
-    const variantClass = variantStyles[type] || variantStyles.success;
-    const iconSvg = icons[type] || icons.success;
-
-    const alertEl = document.createElement('div');
-    alertEl.id = 'minimaToast';
-    alertEl.setAttribute('role', 'alert');
-    alertEl.className = `fixed top-20 right-6 z-[100] w-auto min-w-[280px] max-w-[400px] rounded-2xl border px-4 py-3.5 shadow-2xl shadow-black/40 backdrop-blur-md overflow-hidden minima-toast-enter ${variantClass}`;
-    alertEl.innerHTML = `
-        <div class="flex items-center gap-2">
-            <div class="grow flex items-center">
-                <span class="me-3 inline-flex shrink-0 w-7 h-7 rounded-xl bg-emerald-950/80 border border-emerald-500/30 items-center justify-center">${iconSvg}</span>
-                <p class="text-sm font-semibold text-white">${escapeHtml(message)}</p>
-            </div>
-        </div>
-        <div class="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-500/60 minima-toast-progress"></div>
-    `;
-
-    document.body.appendChild(alertEl);
-
-    toastTimeoutId = setTimeout(() => {
-        alertEl.classList.remove('minima-toast-enter');
-        alertEl.classList.add('minima-toast-exit');
-        setTimeout(() => alertEl.remove(), 320);
-    }, 2800);
+    showSweetAlert(titles[type] || 'Berhasil!', message, type);
 }
 
 function showConfirmAlert({
-    title = 'Konfirmasi',
+    title = 'Perhatian!',
     description = 'Apakah Anda yakin ingin melanjutkan?',
-    confirmText = 'Hapus',
+    confirmText = 'Ya, Hapus',
     cancelText = 'Batal',
+    variant = 'warning',
     onConfirm = null
 } = {}) {
-    const existing = document.getElementById('minimaConfirmBackdrop');
-    if (existing) existing.remove();
+    let overlay = document.getElementById('sweet-alert-overlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'sweet-alert-overlay';
+        document.body.appendChild(overlay);
+    }
 
-    const backdrop = document.createElement('div');
-    backdrop.id = 'minimaConfirmBackdrop';
-    backdrop.className = 'fixed inset-0 z-[100] bg-slate-950/65 flex items-center justify-center px-4 minima-confirm-enter';
-    backdrop.innerHTML = `
-        <div role="alert" class="relative rounded-2xl border border-slate-700/90 z-[101] w-full max-w-[400px] bg-slate-800/95 backdrop-blur-xl p-5 shadow-2xl shadow-black/60 minima-confirm-card-enter">
-            <div class="flex gap-3.5">
-                <span class="mt-0.5 shrink-0 w-10 h-10 rounded-xl bg-emerald-950/80 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shadow-inner">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
-                </span>
-                <div class="grow space-y-1.5">
-                    <h5 class="text-base font-bold text-white tracking-tight">${escapeHtml(title)}</h5>
-                    <div class="text-sm text-slate-300 leading-relaxed">${escapeHtml(description)}</div>
-                    <div class="flex items-center justify-end gap-2.5 pt-3.5">
-                        <button type="button" id="minimaConfirmCancelBtn" class="inline-flex items-center justify-center whitespace-nowrap rounded-xl text-xs font-semibold transition-all duration-200 bg-slate-700 hover:bg-slate-600 text-slate-200 hover:text-white hover:scale-[1.03] active:scale-95 h-9 px-4">
-                            ${escapeHtml(cancelText)}
-                        </button>
-                        <button type="button" id="minimaConfirmOkBtn" class="inline-flex items-center justify-center whitespace-nowrap rounded-xl text-xs font-bold transition-all duration-200 bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-lg shadow-emerald-500/25 hover:scale-[1.03] active:scale-95 h-9 px-4">
-                            ${escapeHtml(confirmText)}
-                        </button>
-                    </div>
-                </div>
+    const iconHtml = getSweetAlertIconHtml(variant);
+
+    overlay.innerHTML = `
+        <div class="swal-modal-box">
+            <div style="font-size: 64px; margin-bottom: 24px;">
+                ${iconHtml}
+            </div>
+            <h3 style="font-size: 24px; font-weight: 800; margin: 0 0 12px 0; color: #ffffff;">${escapeHtml(title)}</h3>
+            <p style="color: #94a3b8; margin: 0 0 28px 0; line-height: 1.5; font-size: 15px;">${escapeHtml(description)}</p>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+                <button type="button" id="swalConfirmOkBtn" class="w-full py-3 px-4 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold rounded-xl text-sm transition-all duration-200 hover:scale-[1.02] active:scale-95 shadow-lg shadow-emerald-500/25 flex items-center justify-center">
+                    ${escapeHtml(confirmText)}
+                </button>
+                <button type="button" id="swalConfirmCancelBtn" class="w-full py-2.5 px-4 bg-transparent hover:bg-slate-700/60 text-slate-200 hover:text-white font-semibold rounded-xl text-sm border border-slate-600/80 transition-all duration-200 flex items-center justify-center">
+                    ${escapeHtml(cancelText)}
+                </button>
             </div>
         </div>
     `;
 
-    document.body.appendChild(backdrop);
-    const alertBox = backdrop.querySelector('[role="alert"]');
-
-    let isClosing = false;
-    const closeConfirm = (callback) => {
-        if (isClosing) return;
-        isClosing = true;
-        backdrop.classList.remove('minima-confirm-enter');
-        backdrop.classList.add('minima-confirm-exit');
-        if (alertBox) {
-            alertBox.classList.remove('minima-confirm-card-enter');
-            alertBox.classList.add('minima-confirm-card-exit');
-        }
-        setTimeout(() => {
-            backdrop.remove();
-            if (typeof callback === 'function') callback();
-        }, 250);
+    overlay.onclick = function(e) {
+        if (e.target === overlay) closeSweetAlert();
     };
 
-    backdrop.querySelector('#minimaConfirmCancelBtn').addEventListener('click', () => closeConfirm());
-    backdrop.addEventListener('click', (e) => {
-        if (e.target === backdrop) closeConfirm();
-    });
-    backdrop.querySelector('#minimaConfirmOkBtn').addEventListener('click', () => {
-        closeConfirm(() => {
+    overlay.querySelector('#swalConfirmCancelBtn').addEventListener('click', () => closeSweetAlert());
+    overlay.querySelector('#swalConfirmOkBtn').addEventListener('click', () => {
+        closeSweetAlert(() => {
             if (typeof onConfirm === 'function') onConfirm();
         });
     });
+
+    void overlay.offsetWidth;
+    overlay.classList.add('open');
 }
 
 function escapeQuote(str) {
