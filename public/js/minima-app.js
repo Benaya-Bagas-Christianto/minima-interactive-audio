@@ -1853,8 +1853,8 @@ function fetchMusics(page = 1, smoothScroll = false) {
                             <img src="${song.image ? '/' + song.image : '/image/queen1.jpg'}" alt="${song.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                             <!-- Overlay Play, 3D & Live Lyrics Buttons -->
                             <div class="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                                <button onclick="event.stopPropagation(); playSong(${song.id}, '${escapeQuote(song.title)}', '${escapeQuote(song.artist)}', '/${song.image || 'image/queen1.jpg'}', '${song.audio_url || ''}', '${song.video_id || ''}')" class="w-11 h-11 bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-full flex items-center justify-center font-bold shadow-xl transition-transform hover:scale-110" title="Putar Lagu">
-                                    <svg class="w-5 h-5 fill-current translate-x-0.5" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                <button onclick="event.stopPropagation(); playSong(${song.id}, '${escapeQuote(song.title)}', '${escapeQuote(song.artist)}', '/${song.image || 'image/queen1.jpg'}', '${song.audio_url || ''}', '${song.video_id || ''}')" class="w-11 h-11 p-0 leading-none bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-full flex items-center justify-center font-bold shadow-xl transition-transform hover:scale-110" title="Putar Lagu">
+                                    <svg class="w-5 h-5 fill-current block m-auto" viewBox="0 0 24 24"><path d="M7.5 5.5v13l10-6.5z"/></svg>
                                 </button>
                                 <button onclick="event.stopPropagation(); openVinylWithSong('${escapeQuote(song.title)}', '${escapeQuote(song.artist)}', '/${song.image || 'image/queen1.jpg'}', ${song.id}, '${song.audio_url || ''}', '${song.video_id || ''}')" class="w-9 h-9 bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-emerald-500/40 rounded-full flex items-center justify-center shadow-xl transition-transform hover:scale-110" title="Putar di Piringan 3D">
                                     <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M16 3.937A9 9 0 1 0 21 12"/><path d="M11 12a1 1 0 1 0 2 0a1 1 0 1 0-2 0m8-8a1 1 0 1 0 2 0a1 1 0 1 0-2 0"/><path d="m20 4l-3.5 10l-2.5 2"/></g></svg>
@@ -2242,8 +2242,8 @@ function renderSearchSuggestions(data, query) {
                     <div class="flex items-center gap-2 flex-shrink-0 ml-2">
                         <span class="text-[11px] font-semibold text-yellow-400">★ ${song.rating}</span>
                         <button onclick="event.stopPropagation(); playSong(${song.id}, '${escapeQuote(song.title)}', '${escapeQuote(song.artist)}', '/${song.image || 'image/queen1.jpg'}', '${song.audio_url || ''}', '${song.video_id || ''}'); hideSearchSuggestions();"
-                            class="p-1.5 rounded-full text-slate-400 hover:text-emerald-400 hover:bg-slate-700 transition-colors" title="Putar Langsung">
-                            <svg class="w-4 h-4 fill-current translate-x-0.5" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                            class="w-7 h-7 p-0 leading-none rounded-full text-slate-400 hover:text-emerald-400 hover:bg-slate-700 flex items-center justify-center transition-colors" title="Putar Langsung">
+                            <svg class="w-4 h-4 fill-current block m-auto" viewBox="0 0 24 24"><path d="M7.5 5.5v13l10-6.5z"/></svg>
                         </button>
                     </div>
                 </div>

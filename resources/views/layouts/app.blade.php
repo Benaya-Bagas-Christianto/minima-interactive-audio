@@ -127,9 +127,9 @@
                     <button onclick="playPrevSong()" class="text-slate-400 hover:text-white transition-colors" title="Lagu Sebelumnya">
                         <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
                     </button>
-                    <button id="mainPlayBtn" onclick="togglePlayAudio()" class="w-10 h-10 bg-emerald-500 hover:bg-emerald-400 rounded-full flex items-center justify-center text-slate-950 font-bold shadow-lg transition-transform hover:scale-105" title="Play/Pause">
-                        <svg id="playIcon" class="w-5 h-5 fill-current translate-x-0.5" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                        <svg id="pauseIcon" class="w-5 h-5 fill-current hidden" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                    <button id="mainPlayBtn" onclick="togglePlayAudio()" class="w-10 h-10 p-0 leading-none bg-emerald-500 hover:bg-emerald-400 rounded-full flex items-center justify-center text-slate-950 font-bold shadow-lg transition-transform hover:scale-105" title="Play/Pause">
+                        <svg id="playIcon" class="w-5 h-5 fill-current block m-auto" viewBox="0 0 24 24"><path d="M7.5 5.5v13l10-6.5z"/></svg>
+                        <svg id="pauseIcon" class="w-5 h-5 fill-current hidden m-auto" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
                     </button>
                     <button onclick="playNextSong()" class="text-slate-400 hover:text-white transition-colors" title="Lagu Selanjutnya">
                         <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
@@ -226,9 +226,9 @@
                         <button onclick="playPrevSong()" class="w-9 h-9 rounded-full bg-slate-700/80 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition-transform hover:scale-105" title="Lagu Sebelumnya">
                             <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
                         </button>
-                        <button id="vinylPlayToggleBtn" onclick="togglePlayAudio()" class="w-12 h-12 bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-full flex items-center justify-center font-bold shadow-xl transition-transform hover:scale-110" title="Play / Pause Piringan">
-                            <svg id="vinylModalPlayIcon" class="w-6 h-6 fill-current translate-x-0.5" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                            <svg id="vinylModalPauseIcon" class="w-6 h-6 fill-current hidden" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                        <button id="vinylPlayToggleBtn" onclick="togglePlayAudio()" class="w-12 h-12 p-0 leading-none bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-full flex items-center justify-center font-bold shadow-xl transition-transform hover:scale-110" title="Play / Pause Piringan">
+                            <svg id="vinylModalPlayIcon" class="w-6 h-6 fill-current block m-auto" viewBox="0 0 24 24"><path d="M7.5 5.5v13l10-6.5z"/></svg>
+                            <svg id="vinylModalPauseIcon" class="w-6 h-6 fill-current hidden m-auto" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
                         </button>
                         <button onclick="playNextSong()" class="w-9 h-9 rounded-full bg-slate-700/80 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition-transform hover:scale-105" title="Lagu Selanjutnya">
                             <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
@@ -288,9 +288,9 @@
                         <button onclick="playPrevSong()" class="w-9 h-9 rounded-full bg-slate-700/80 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition-transform hover:scale-105" title="Lagu Sebelumnya">
                             <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
                         </button>
-                        <button onclick="togglePlayAudio()" class="w-12 h-12 bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-full flex items-center justify-center font-bold shadow-xl transition-transform hover:scale-110" title="Play / Pause Lagu">
-                            <svg id="lyricsModalPlayIcon" class="w-6 h-6 fill-current translate-x-0.5" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                            <svg id="lyricsModalPauseIcon" class="w-6 h-6 fill-current hidden" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                        <button onclick="togglePlayAudio()" class="w-12 h-12 p-0 leading-none bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-full flex items-center justify-center font-bold shadow-xl transition-transform hover:scale-110" title="Play / Pause Lagu">
+                            <svg id="lyricsModalPlayIcon" class="w-6 h-6 fill-current block m-auto" viewBox="0 0 24 24"><path d="M7.5 5.5v13l10-6.5z"/></svg>
+                            <svg id="lyricsModalPauseIcon" class="w-6 h-6 fill-current hidden m-auto" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
                         </button>
                         <button onclick="playNextSong()" class="w-9 h-9 rounded-full bg-slate-700/80 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition-transform hover:scale-105" title="Lagu Selanjutnya">
                             <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
