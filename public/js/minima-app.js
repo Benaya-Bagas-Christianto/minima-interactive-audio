@@ -2828,9 +2828,9 @@ function viewPlaylistDetail(playlistId) {
                 songsContainer.innerHTML = '<p class="text-slate-400 text-sm py-4">Belum ada lagu di playlist ini. Telusuri katalog dan tambahkan lagu ke playlist ini.</p>';
             } else {
                 songsContainer.innerHTML = p.musics.map((song, idx) => `
-                    <div class="flex items-center justify-between p-3 rounded-xl bg-slate-900/40 hover:bg-slate-800 transition-colors border border-slate-700/40">
+                    <div id="playlist-song-${song.id}" data-playlist-song-id="${song.id}" class="flex items-center justify-between p-3 rounded-xl bg-slate-900/40 hover:bg-slate-800 transition-colors border border-slate-700/40">
                         <div class="flex items-center space-x-3 truncate">
-                            <span class="text-xs font-bold text-slate-500 w-5">${idx + 1}</span>
+                            <span class="playlist-song-idx text-xs font-bold text-slate-500 w-5">${idx + 1}</span>
                             <img src="${song.image ? '/' + song.image : '/image/queen1.jpg'}" class="w-10 h-10 rounded-lg object-cover">
                             <div class="truncate">
                                 <h4 class="font-bold text-white text-sm truncate hover:text-emerald-400 cursor-pointer" onclick="openMusicModal(${song.id})">${song.title}</h4>
@@ -2841,7 +2841,7 @@ function viewPlaylistDetail(playlistId) {
                             <button onclick="playSong(${song.id}, '${escapeQuote(song.title)}', '${escapeQuote(song.artist)}', '/${song.image || 'image/queen1.jpg'}', '${song.audio_url || ''}', '${song.video_id || ''}')" class="px-3 py-1 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-lg text-xs">
                                 Putar
                             </button>
-                            <button onclick="removeSongFromPlaylist(${p.id}, ${song.id})" class="text-slate-500 hover:text-red-400 p-1" title="Hapus lagu">
+                            <button onclick="removeSongFromPlaylist(${p.id}, ${song.id})" class="text-slate-500 hover:text-red-400 p-1 transition-colors" title="Hapus lagu">
                                 ✕
                             </button>
                         </div>
@@ -2855,14 +2855,27 @@ function viewPlaylistDetail(playlistId) {
 
 function removeSongFromPlaylist(playlistId, songId) {
     const csrf = document.querySelector('meta[name="csrf-token"]').content;
+    const rowEl = document.getElementById(`playlist-song-${songId}`);
+    const containerEl = document.getElementById('playlistViewSongs');
+
     fetch(`/api/playlists/${playlistId}/songs/${songId}`, {
         method: 'DELETE',
         headers: { 'X-CSRF-TOKEN': csrf }
     })
     .then(res => res.json())
     .then(data => {
-        showToast(data.message);
-        viewPlaylistDetail(playlistId);
+        showToast(data.message || 'Lagu dihapus dari playlist.', 'success');
+        if (rowEl && containerEl) {
+            animateCardDeleteAndReflow(rowEl, containerEl, () => {
+                containerEl.innerHTML = '<p class="text-slate-400 text-sm py-4 song-card-animated">Belum ada lagu di playlist ini. Telusuri katalog dan tambahkan lagu ke playlist ini.</p>';
+            }, () => {
+                containerEl.querySelectorAll('.playlist-song-idx').forEach((el, i) => {
+                    el.textContent = i + 1;
+                });
+            });
+        } else {
+            viewPlaylistDetail(playlistId);
+        }
         loadPlaylists();
     });
 }
@@ -2875,6 +2888,9 @@ function deletePlaylist(playlistId) {
         cancelText: 'Batal',
         variant: 'warning',
         onConfirm: () => {
+            const viewEl = document.getElementById('playlist-view');
+            if (viewEl) viewEl.classList.add('minima-card-deleting');
+
             const csrf = document.querySelector('meta[name="csrf-token"]').content;
             fetch(`/api/playlists/${playlistId}`, {
                 method: 'DELETE',
@@ -2882,9 +2898,12 @@ function deletePlaylist(playlistId) {
             })
             .then(res => res.json())
             .then(data => {
-                showToast(data.message || 'Playlist berhasil dihapus!', 'success');
-                showSection('playlists');
-                loadPlaylists();
+                setTimeout(() => {
+                    if (viewEl) viewEl.classList.remove('minima-card-deleting');
+                    showToast(data.message || 'Playlist berhasil dihapus!', 'success');
+                    showSection('playlists');
+                    loadPlaylists();
+                }, 380);
             });
         }
     });
@@ -2954,7 +2973,7 @@ function loadReviews() {
 
             if (!reviews || reviews.length === 0) {
                 list.innerHTML = `
-                    <div class="bg-slate-800/40 p-8 rounded-2xl border border-dashed border-slate-700/60 text-center select-none">
+                    <div class="bg-slate-800/40 p-8 rounded-2xl border border-dashed border-slate-700/60 text-center select-none song-card-animated">
                         <p class="text-slate-400 text-sm">Belum ada ulasan yang tersimpan di database.</p>
                         <p class="text-xs text-emerald-400 mt-1 font-medium">Buka detail lagu mana saja di katalog lalu kirim ulasan pertama Anda!</p>
                     </div>
@@ -2962,7 +2981,7 @@ function loadReviews() {
                 return;
             }
 
-            list.innerHTML = reviews.map(r => {
+            list.innerHTML = reviews.map((r, idx) => {
                 const rating = Math.max(1, Math.min(5, parseInt(r.rating) || 5));
                 const dateStr = r.created_at ? new Date(r.created_at).toLocaleDateString('id-ID', {
                     day: 'numeric',
@@ -2971,7 +2990,7 @@ function loadReviews() {
                 }) : 'Baru saja';
 
                 return `
-                    <div class="bg-slate-800/80 p-5 rounded-2xl border border-slate-700/60 shadow-lg flex flex-col justify-between hover:border-slate-600 transition-all">
+                    <div id="review-card-${r.id}" data-review-id="${r.id}" style="animation-delay: ${Math.min(idx * 45, 250)}ms" class="song-card-animated bg-slate-800/80 p-5 rounded-2xl border border-slate-700/60 shadow-lg flex flex-col justify-between hover:border-slate-600 transition-all">
                         <div>
                             <div class="flex items-center justify-between mb-2">
                                 <h4 class="font-bold text-white text-base">${escapeHtml(r.music_title)}</h4>
@@ -2991,8 +3010,8 @@ function loadReviews() {
                                 Tersimpan di Database
                             </span>
                             <div class="flex space-x-2">
-                                <button onclick="openEditReviewModal(${r.id}, ${rating}, '${escapeQuote(r.review)}')" class="px-3.5 py-1.5 bg-slate-700 hover:bg-emerald-600 text-white rounded-xl transition-colors font-semibold">Edit</button>
-                                <button onclick="deleteReview(${r.id})" class="px-3.5 py-1.5 bg-slate-700 hover:bg-red-600 text-white rounded-xl transition-colors font-semibold">Hapus</button>
+                                <button onclick="openEditReviewModal(${r.id}, ${rating}, '${escapeQuote(r.review)}')" class="px-3.5 py-1.5 bg-slate-700 hover:bg-emerald-600 text-white rounded-xl transition-all duration-200 hover:scale-105 active:scale-95 font-semibold">Edit</button>
+                                <button onclick="deleteReview(${r.id})" class="px-3.5 py-1.5 bg-slate-700 hover:bg-red-600 text-white rounded-xl transition-all duration-200 hover:scale-105 active:scale-95 font-semibold">Hapus</button>
                             </div>
                         </div>
                     </div>
@@ -3002,6 +3021,50 @@ function loadReviews() {
         .catch(err => {
             console.error('Error fetching reviews:', err);
         });
+}
+
+function animateCardDeleteAndReflow(targetEl, containerEl, onEmptyCallback = null, onAfterReflow = null) {
+    if (!targetEl || !containerEl) return;
+
+    const siblings = Array.from(containerEl.children).filter(el => el !== targetEl);
+    const firstRects = new Map();
+    siblings.forEach(el => firstRects.set(el, el.getBoundingClientRect()));
+
+    targetEl.classList.add('minima-card-deleting');
+
+    setTimeout(() => {
+        targetEl.remove();
+
+        const remaining = Array.from(containerEl.children);
+        if (remaining.length === 0) {
+            if (typeof onEmptyCallback === 'function') onEmptyCallback();
+            return;
+        }
+
+        remaining.forEach(el => {
+            const first = firstRects.get(el);
+            if (!first) return;
+            const last = el.getBoundingClientRect();
+            const dx = first.left - last.left;
+            const dy = first.top - last.top;
+            if (Math.abs(dx) > 1 || Math.abs(dy) > 1) {
+                el.style.transition = 'none';
+                el.style.transform = `translate(${dx}px, ${dy}px)`;
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        el.style.transition = 'transform 0.44s cubic-bezier(0.16, 1, 0.3, 1)';
+                        el.style.transform = 'translate(0, 0)';
+                        setTimeout(() => {
+                            el.style.transition = '';
+                            el.style.transform = '';
+                        }, 450);
+                    });
+                });
+            }
+        });
+
+        if (typeof onAfterReflow === 'function') onAfterReflow();
+    }, 420);
 }
 
 function openEditReviewModal(id, rating, reviewText) {
@@ -3108,7 +3171,10 @@ function deleteReview(id) {
         cancelText: 'Batal',
         variant: 'warning',
         onConfirm: () => {
+            const cardEl = document.getElementById(`review-card-${id}`);
+            const listEl = document.getElementById('myReviewsList');
             const csrf = document.querySelector('meta[name="csrf-token"]').content;
+
             fetch(`/api/reviews/${id}`, {
                 method: 'DELETE',
                 headers: {
@@ -3119,7 +3185,20 @@ function deleteReview(id) {
             .then(res => res.json())
             .then(data => {
                 showToast(data.message || 'Ulasan berhasil dihapus dari database!', 'success');
-                loadReviews();
+
+                if (cardEl && listEl) {
+                    animateCardDeleteAndReflow(cardEl, listEl, () => {
+                        listEl.innerHTML = `
+                            <div class="bg-slate-800/40 p-8 rounded-2xl border border-dashed border-slate-700/60 text-center select-none song-card-animated">
+                                <p class="text-slate-400 text-sm">Belum ada ulasan yang tersimpan di database.</p>
+                                <p class="text-xs text-emerald-400 mt-1 font-medium">Buka detail lagu mana saja di katalog lalu kirim ulasan pertama Anda!</p>
+                            </div>
+                        `;
+                    });
+                } else {
+                    loadReviews();
+                }
+
                 if (currentDetailSong) {
                     refreshModalSongReviews(currentDetailSong.id);
                 }
@@ -3165,7 +3244,7 @@ function showToast(message, type = 'success') {
     const alertEl = document.createElement('div');
     alertEl.id = 'minimaToast';
     alertEl.setAttribute('role', 'alert');
-    alertEl.className = `fixed top-20 right-6 z-[100] w-auto min-w-[280px] max-w-[400px] rounded-2xl border px-4 py-3.5 shadow-2xl shadow-black/40 backdrop-blur-md transition-all duration-200 opacity-0 -translate-y-2 ${variantClass}`;
+    alertEl.className = `fixed top-20 right-6 z-[100] w-auto min-w-[280px] max-w-[400px] rounded-2xl border px-4 py-3.5 shadow-2xl shadow-black/40 backdrop-blur-md overflow-hidden minima-toast-enter ${variantClass}`;
     alertEl.innerHTML = `
         <div class="flex items-center gap-2">
             <div class="grow flex items-center">
@@ -3173,18 +3252,15 @@ function showToast(message, type = 'success') {
                 <p class="text-sm font-semibold text-white">${escapeHtml(message)}</p>
             </div>
         </div>
+        <div class="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-500/60 minima-toast-progress"></div>
     `;
 
     document.body.appendChild(alertEl);
-    requestAnimationFrame(() => {
-        alertEl.classList.remove('opacity-0', '-translate-y-2');
-        alertEl.classList.add('opacity-100', 'translate-y-0');
-    });
 
     toastTimeoutId = setTimeout(() => {
-        alertEl.classList.remove('opacity-100', 'translate-y-0');
-        alertEl.classList.add('opacity-0', '-translate-y-2');
-        setTimeout(() => alertEl.remove(), 200);
+        alertEl.classList.remove('minima-toast-enter');
+        alertEl.classList.add('minima-toast-exit');
+        setTimeout(() => alertEl.remove(), 320);
     }, 2800);
 }
 
@@ -3200,21 +3276,21 @@ function showConfirmAlert({
 
     const backdrop = document.createElement('div');
     backdrop.id = 'minimaConfirmBackdrop';
-    backdrop.className = 'fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center px-4 transition-opacity duration-150 opacity-0';
+    backdrop.className = 'fixed inset-0 z-[100] bg-slate-950/65 flex items-center justify-center px-4 minima-confirm-enter';
     backdrop.innerHTML = `
-        <div role="alert" class="relative rounded-2xl border border-slate-700 z-[101] w-full max-w-[400px] bg-slate-800 p-5 shadow-2xl shadow-black/50 transition-transform duration-150 scale-95">
+        <div role="alert" class="relative rounded-2xl border border-slate-700/90 z-[101] w-full max-w-[400px] bg-slate-800/95 backdrop-blur-xl p-5 shadow-2xl shadow-black/60 minima-confirm-card-enter">
             <div class="flex gap-3.5">
-                <span class="mt-0.5 shrink-0 w-10 h-10 rounded-xl bg-emerald-950/80 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                <span class="mt-0.5 shrink-0 w-10 h-10 rounded-xl bg-emerald-950/80 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shadow-inner">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
                 </span>
                 <div class="grow space-y-1.5">
-                    <h5 class="text-base font-bold text-white">${escapeHtml(title)}</h5>
+                    <h5 class="text-base font-bold text-white tracking-tight">${escapeHtml(title)}</h5>
                     <div class="text-sm text-slate-300 leading-relaxed">${escapeHtml(description)}</div>
-                    <div class="flex items-center justify-end gap-2.5 pt-3">
-                        <button type="button" id="minimaConfirmCancelBtn" class="inline-flex items-center justify-center whitespace-nowrap rounded-xl text-xs font-semibold transition-colors bg-slate-700 hover:bg-slate-600 text-slate-200 hover:text-white h-9 px-4">
+                    <div class="flex items-center justify-end gap-2.5 pt-3.5">
+                        <button type="button" id="minimaConfirmCancelBtn" class="inline-flex items-center justify-center whitespace-nowrap rounded-xl text-xs font-semibold transition-all duration-200 bg-slate-700 hover:bg-slate-600 text-slate-200 hover:text-white hover:scale-[1.03] active:scale-95 h-9 px-4">
                             ${escapeHtml(cancelText)}
                         </button>
-                        <button type="button" id="minimaConfirmOkBtn" class="inline-flex items-center justify-center whitespace-nowrap rounded-xl text-xs font-bold transition-colors bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-lg shadow-emerald-500/20 h-9 px-4">
+                        <button type="button" id="minimaConfirmOkBtn" class="inline-flex items-center justify-center whitespace-nowrap rounded-xl text-xs font-bold transition-all duration-200 bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-lg shadow-emerald-500/25 hover:scale-[1.03] active:scale-95 h-9 px-4">
                             ${escapeHtml(confirmText)}
                         </button>
                     </div>
@@ -3226,28 +3302,30 @@ function showConfirmAlert({
     document.body.appendChild(backdrop);
     const alertBox = backdrop.querySelector('[role="alert"]');
 
-    requestAnimationFrame(() => {
-        backdrop.classList.remove('opacity-0');
-        backdrop.classList.add('opacity-100');
+    let isClosing = false;
+    const closeConfirm = (callback) => {
+        if (isClosing) return;
+        isClosing = true;
+        backdrop.classList.remove('minima-confirm-enter');
+        backdrop.classList.add('minima-confirm-exit');
         if (alertBox) {
-            alertBox.classList.remove('scale-95');
-            alertBox.classList.add('scale-100');
+            alertBox.classList.remove('minima-confirm-card-enter');
+            alertBox.classList.add('minima-confirm-card-exit');
         }
-    });
-
-    const closeConfirm = () => {
-        backdrop.classList.remove('opacity-100');
-        backdrop.classList.add('opacity-0');
-        setTimeout(() => backdrop.remove(), 150);
+        setTimeout(() => {
+            backdrop.remove();
+            if (typeof callback === 'function') callback();
+        }, 250);
     };
 
-    backdrop.querySelector('#minimaConfirmCancelBtn').addEventListener('click', closeConfirm);
+    backdrop.querySelector('#minimaConfirmCancelBtn').addEventListener('click', () => closeConfirm());
     backdrop.addEventListener('click', (e) => {
         if (e.target === backdrop) closeConfirm();
     });
     backdrop.querySelector('#minimaConfirmOkBtn').addEventListener('click', () => {
-        closeConfirm();
-        if (typeof onConfirm === 'function') onConfirm();
+        closeConfirm(() => {
+            if (typeof onConfirm === 'function') onConfirm();
+        });
     });
 }
 
