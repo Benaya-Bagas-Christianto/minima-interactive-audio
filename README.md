@@ -251,20 +251,7 @@ Jika menggunakan Laragon:
 2. **Memutar di Piringan 3D**: Klik tombol 3D pada kover lagu untuk mengaktifkan pemutar piringan hitam 3D. Seret kursor mouse pada piringan hitam untuk mengubah sudut pandang meja putar.
 3. **Melihat Detail dan Analisis**: Klik tombol "Detail & Analisis" pada lagu untuk membaca telaah makna, komposisi, serta ulasan pendengar.
 4. **Memberi Ulasan dan Rating**: Buka modal detail lagu, sorot dan klik bintang penilaian (1-5), tuliskan komentar Anda, lalu klik "Kirim Ulasan".
-5. **Membuat dan Mengisi Playlist**: Masuk ke menu "Koleksi Playlist", buat playlist baru, lalu tambahkan lagu yang Anda sukai ke dalam playlist tersebut.
-6. **Menonton Video Klip**: Pada detail lagu, klik tombol "Tonton Video Klip Musik (MV)" untuk memutar video musik YouTube terkait.
-
----
-
-## Tim Pengembang
-
-Proyek ini dikembangkan oleh Kelompok 2 (Kelas 17.5A.27) untuk pemenuhan Tugas Proyek Akhir Mata Kuliah Sistem Multimedia:
-
-1. Paul Siagian (NIM: 17240668)
-2. Arla Raesa Isalim (NIM: 17240410)
-3. Muhammad Surya Triabadi (NIM: 17240151)
-4. Al Muzamil Sahri Ramadhan (NIM: 17240641)
-5. Elrado Keni Sierra (NIM: 17240475)
+5. **Membuat dan Mengisi Playlist**: Masuk ke menu "Koleksi Playlist", buat playlist baru, ganti & crop gambar sampul playlist sesuai keinginan, lalu tambahkan lagu yang Anda sukai ke dalam playlist tersebut.
 
 ---
 
