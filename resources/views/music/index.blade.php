@@ -260,28 +260,37 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
             <div class="bg-slate-800/80 rounded-2xl p-8 border border-slate-700 shadow-xl">
-                <h3 class="text-2xl font-bold text-emerald-400 mb-3 flex items-center gap-2">
-                    <span>🌟</span> Visi Proyek
+                <h3 class="text-2xl font-bold text-emerald-400 mb-3 flex items-center gap-2.5">
+                    <svg class="w-6 h-6 text-emerald-400 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/>
+                        <path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/>
+                    </svg>
+                    <span>Visi Proyek</span>
                 </h3>
                 <p class="text-slate-300 leading-relaxed text-sm text-justify">
                     Mengembangkan aplikasi multimedia interaktif berbasis Web yang inklusif dan edukatif, di mana musik lintas era dapat diapresiasi secara visual dan auditori melalui perpaduan audio resolusi tinggi, video klip, serta teknologi 3D WebGL modern.
                 </p>
             </div>
             <div class="bg-slate-800/80 rounded-2xl p-8 border border-slate-700 shadow-xl">
-                <h3 class="text-2xl font-bold text-emerald-400 mb-3 flex items-center gap-2">
-                    <span>🎯</span> Misi Proyek
+                <h3 class="text-2xl font-bold text-emerald-400 mb-3 flex items-center gap-2.5">
+                    <svg class="w-6 h-6 text-emerald-400 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <circle cx="12" cy="12" r="6"/>
+                        <circle cx="12" cy="12" r="2"/>
+                    </svg>
+                    <span>Misi Proyek</span>
                 </h3>
-                <ul class="space-y-2 text-slate-300 text-sm">
-                    <li class="flex items-start gap-2">
-                        <span class="text-emerald-400 font-bold">✓</span>
+                <ul class="space-y-2.5 text-slate-300 text-sm">
+                    <li class="flex items-start gap-2.5">
+                        <svg class="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
                         <span>Menyajikan kurasi 200+ karya musik lintas 8 era genre lengkap dengan analisis latar belakang.</span>
                     </li>
-                    <li class="flex items-start gap-2">
-                        <span class="text-emerald-400 font-bold">✓</span>
+                    <li class="flex items-start gap-2.5">
+                        <svg class="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
                         <span>Mengintegrasikan elemen multimedia esensial: Teks, Audio Player, Video Musik, dan Objek 3D Vinyl.</span>
                     </li>
-                    <li class="flex items-start gap-2">
-                        <span class="text-emerald-400 font-bold">✓</span>
+                    <li class="flex items-start gap-2.5">
+                        <svg class="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
                         <span>Menerapkan arsitektur Model-View-Controller (MVC) menggunakan Laravel 11 dan database relasional.</span>
                     </li>
                 </ul>
