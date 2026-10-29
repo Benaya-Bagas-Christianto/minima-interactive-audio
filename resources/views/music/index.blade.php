@@ -216,8 +216,17 @@
         </button>
 
         <div class="flex flex-col md:flex-row items-center md:items-end gap-8 mb-8 bg-gradient-to-b from-slate-800 to-slate-900/90 p-8 rounded-2xl border border-slate-700/60 shadow-2xl">
-            <div id="playlistViewImage" class="w-48 h-48 bg-slate-700 rounded-2xl shadow-2xl flex items-center justify-center text-5xl overflow-hidden flex-shrink-0 border-2 border-emerald-500/30">
-                🎵
+            <div class="relative group w-48 h-48 flex-shrink-0">
+                <div id="playlistViewImage" class="w-full h-full bg-slate-700 rounded-2xl shadow-2xl flex items-center justify-center text-5xl overflow-hidden border-2 border-emerald-500/30">
+                    🎵
+                </div>
+                <button type="button" onclick="triggerPlaylistImageUpload()" title="Ganti & Crop Gambar Sampul Playlist" class="absolute bottom-2.5 left-2.5 z-10 w-10 h-10 rounded-xl bg-slate-900/90 hover:bg-emerald-500 text-emerald-400 hover:text-slate-950 border border-emerald-500/40 hover:border-emerald-400 shadow-lg backdrop-blur-md flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95">
+                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/>
+                        <circle cx="12" cy="13" r="3"/>
+                    </svg>
+                </button>
+                <input type="file" id="playlistImageInput" accept="image/*" class="hidden" onchange="handlePlaylistImageSelect(event)">
             </div>
             <div class="w-full text-center md:text-left">
                 <span class="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-1 inline-block">Playlist Komunitas</span>
@@ -543,6 +552,64 @@
                     <button type="submit" class="flex-1 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-xl text-sm">Simpan Perubahan</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL: CROP GAMBAR PLAYLIST (CROPPER.JS) ==================== -->
+    <div id="cropPlaylistImageModal" class="modal" onclick="if(event.target === this) closeCropPlaylistModal()">
+        <div class="bg-slate-800 rounded-2xl max-w-lg w-full mx-4 p-6 border border-slate-700 shadow-2xl relative">
+            <div class="flex justify-between items-center mb-4 border-b border-slate-700 pb-3">
+                <div class="flex items-center gap-2.5">
+                    <span class="w-8 h-8 rounded-xl bg-emerald-950/80 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/></svg>
+                    </span>
+                    <div>
+                        <h3 class="text-lg font-bold text-white leading-tight">Sesuaikan & Crop Sampul Playlist</h3>
+                        <p class="text-[11px] text-slate-400">Geser dan perbesar area gambar persegi (1:1) sesuai keinginan Anda</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeCropPlaylistModal()" class="text-slate-400 hover:text-white text-2xl leading-none">&times;</button>
+            </div>
+
+            <!-- Cropper Canvas Area -->
+            <div class="w-full h-72 sm:h-80 bg-slate-950 rounded-xl overflow-hidden border border-slate-700 flex items-center justify-center relative">
+                <img id="cropperTargetImage" src="" alt="Preview Crop" class="max-w-full max-h-full block">
+            </div>
+
+            <!-- Crop Controls Toolbar -->
+            <div class="flex items-center justify-between gap-2 mt-4 bg-slate-900/80 px-3 py-2 rounded-xl border border-slate-700/70">
+                <div class="flex items-center gap-1.5">
+                    <button type="button" onclick="cropperZoom(0.1)" title="Perbesar (Zoom In)" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-emerald-400 border border-slate-700 transition-colors">
+                        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" x2="16.65" y1="21" y2="16.65"/><line x1="11" x2="11" y1="8" y2="14"/><line x1="8" x2="14" y1="11" y2="11"/></svg>
+                    </button>
+                    <button type="button" onclick="cropperZoom(-0.1)" title="Perkecil (Zoom Out)" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-emerald-400 border border-slate-700 transition-colors">
+                        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" x2="16.65" y1="21" y2="16.65"/><line x1="8" x2="14" y1="11" y2="11"/></svg>
+                    </button>
+                    <button type="button" onclick="cropperRotate(-90)" title="Putar Kiri 90°" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-emerald-400 border border-slate-700 transition-colors">
+                        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                    </button>
+                    <button type="button" onclick="cropperRotate(90)" title="Putar Kanan 90°" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-emerald-400 border border-slate-700 transition-colors">
+                        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+                    </button>
+                    <button type="button" onclick="cropperReset()" title="Reset Posisi" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 text-xs font-medium transition-colors">
+                        Reset
+                    </button>
+                </div>
+                <button type="button" onclick="triggerPlaylistImageUpload()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-emerald-500/30 text-xs font-semibold transition-colors inline-flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+                    Pilih File Lain
+                </button>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex gap-2.5 mt-5">
+                <button type="button" onclick="closeCropPlaylistModal()" class="flex-1 py-2.5 bg-slate-700 hover:bg-slate-600 text-white rounded-xl text-sm font-semibold transition-colors">
+                    Batal
+                </button>
+                <button type="button" id="saveCroppedPlaylistBtn" onclick="saveCroppedPlaylistImage()" class="flex-1 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold rounded-xl text-sm transition-all shadow-lg shadow-emerald-500/20">
+                    Potong & Simpan Gambar
+                </button>
+            </div>
         </div>
     </div>
 

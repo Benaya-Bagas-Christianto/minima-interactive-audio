@@ -2723,8 +2723,14 @@ function loadPlaylists() {
 
             grid.innerHTML = playlists.map(p => `
                 <div onclick="viewPlaylistDetail(${p.id})" class="bg-slate-800/80 p-5 rounded-2xl border border-slate-700/60 hover:border-emerald-500/50 transition-all hover:-translate-y-1 cursor-pointer group shadow-xl">
-                    <div class="aspect-square bg-slate-700 rounded-xl mb-4 overflow-hidden flex items-center justify-center text-4xl shadow-inner border border-slate-700">
-                        ${p.image ? `<img src="/${p.image}" class="w-full h-full object-cover">` : '🎧'}
+                    <div class="relative aspect-square bg-slate-700 rounded-xl mb-4 overflow-hidden flex items-center justify-center text-4xl shadow-inner border border-slate-700">
+                        ${p.image ? `<img src="/${p.image}?v=${Date.now()}" class="w-full h-full object-cover">` : '🎧'}
+                        <button type="button" onclick="event.stopPropagation(); triggerPlaylistImageUpload(${p.id})" title="Ganti & Crop Gambar Sampul Playlist" class="absolute bottom-2.5 left-2.5 z-10 w-9 h-9 rounded-xl bg-slate-900/90 hover:bg-emerald-500 text-emerald-400 hover:text-slate-950 border border-emerald-500/40 hover:border-emerald-400 shadow-lg backdrop-blur-md flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95">
+                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/>
+                                <circle cx="12" cy="13" r="3"/>
+                            </svg>
+                        </button>
                     </div>
                     <h3 class="font-bold text-white text-base truncate group-hover:text-emerald-400">${p.name}</h3>
                     <p class="text-xs text-slate-400 mt-1 line-clamp-2">${p.description || 'Tidak ada deskripsi.'}</p>
@@ -2819,7 +2825,7 @@ function viewPlaylistDetail(playlistId) {
             document.getElementById('playlistViewCount').textContent = p.musics.length;
 
             const imgContainer = document.getElementById('playlistViewImage');
-            imgContainer.innerHTML = p.image ? `<img src="/${p.image}" class="w-full h-full object-cover">` : '🎵';
+            imgContainer.innerHTML = p.image ? `<img src="/${p.image}?v=${Date.now()}" class="w-full h-full object-cover">` : '🎵';
 
             document.getElementById('deletePlaylistBtn').onclick = () => deletePlaylist(p.id);
 
@@ -2960,6 +2966,163 @@ function handleEditPlaylistSubmit(e) {
     .catch(err => {
         console.error(err);
         showToast('Terjadi kesalahan saat menyimpan playlist.', 'error');
+    });
+}
+
+let playlistCropper = null;
+let targetCropPlaylistId = null;
+
+function triggerPlaylistImageUpload(playlistId = null) {
+    targetCropPlaylistId = playlistId || activePlaylistId;
+    if (!targetCropPlaylistId) {
+        showToast('Pilih playlist terlebih dahulu.', 'error');
+        return;
+    }
+    const fileInput = document.getElementById('playlistImageInput');
+    if (fileInput) {
+        fileInput.value = '';
+        fileInput.click();
+    }
+}
+
+function handlePlaylistImageSelect(event) {
+    const file = event.target.files && event.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+        showToast('Silakan pilih file gambar yang valid (JPG, PNG, WEBP).', 'error');
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const imgEl = document.getElementById('cropperTargetImage');
+        const modal = document.getElementById('cropPlaylistImageModal');
+        if (!imgEl || !modal) return;
+
+        if (playlistCropper) {
+            playlistCropper.destroy();
+            playlistCropper = null;
+        }
+
+        imgEl.src = e.target.result;
+        modal.classList.add('active');
+        lockBodyScroll();
+
+        setTimeout(() => {
+            if (typeof Cropper === 'function') {
+                playlistCropper = new Cropper(imgEl, {
+                    aspectRatio: 1,
+                    viewMode: 1,
+                    dragMode: 'move',
+                    autoCropArea: 0.9,
+                    restore: false,
+                    guides: true,
+                    center: true,
+                    highlight: false,
+                    cropBoxMovable: true,
+                    cropBoxResizable: true,
+                    toggleDragModeOnDblclick: false,
+                    background: false,
+                    responsive: true
+                });
+            }
+        }, 60);
+    };
+    reader.readAsDataURL(file);
+}
+
+function closeCropPlaylistModal() {
+    const modal = document.getElementById('cropPlaylistImageModal');
+    if (modal) modal.classList.remove('active');
+    if (playlistCropper) {
+        playlistCropper.destroy();
+        playlistCropper = null;
+    }
+    unlockBodyScroll();
+}
+
+function cropperZoom(ratio) {
+    if (playlistCropper) playlistCropper.zoom(ratio);
+}
+
+function cropperRotate(deg) {
+    if (playlistCropper) playlistCropper.rotate(deg);
+}
+
+function cropperReset() {
+    if (playlistCropper) playlistCropper.reset();
+}
+
+function saveCroppedPlaylistImage() {
+    const playlistId = targetCropPlaylistId || activePlaylistId;
+    if (!playlistCropper || !playlistId) {
+        showToast('Tidak ada gambar untuk disimpan.', 'error');
+        return;
+    }
+
+    const btn = document.getElementById('saveCroppedPlaylistBtn');
+    const originalText = btn ? btn.textContent : 'Potong & Simpan Gambar';
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Menyimpan...';
+    }
+
+    const canvas = playlistCropper.getCroppedCanvas({
+        width: 600,
+        height: 600,
+        imageSmoothingEnabled: true,
+        imageSmoothingQuality: 'high'
+    });
+
+    if (!canvas) {
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = originalText;
+        }
+        showToast('Gagal memotong gambar.', 'error');
+        return;
+    }
+
+    const croppedDataUrl = canvas.toDataURL('image/jpeg', 0.92);
+    const csrf = document.querySelector('meta[name="csrf-token"]').content;
+
+    fetch(`/api/playlists/${playlistId}/image`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': csrf,
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({ cropped_image: croppedDataUrl })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = originalText;
+        }
+        if (data.success) {
+            closeCropPlaylistModal();
+            showToast(data.message || 'Gambar sampul playlist berhasil diperbarui!', 'success');
+            if (activePlaylistId && String(activePlaylistId) === String(playlistId)) {
+                const imgContainer = document.getElementById('playlistViewImage');
+                if (imgContainer && data.image) {
+                    imgContainer.innerHTML = `<img src="/${data.image}?v=${Date.now()}" class="w-full h-full object-cover">`;
+                }
+            }
+            loadPlaylists();
+        } else {
+            showToast(data.message || 'Gagal memperbarui gambar playlist.', 'error');
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = originalText;
+        }
+        showToast('Terjadi kesalahan saat mengunggah gambar.', 'error');
     });
 }
 

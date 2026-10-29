@@ -104,6 +104,60 @@ class PlaylistController extends Controller
     }
 
     /**
+     * Perbarui gambar sampul playlist (hasil crop dari file manager).
+     */
+    public function updateImage(Request $request, $id)
+    {
+        $request->validate([
+            'cropped_image' => 'required|string',
+        ]);
+
+        $playlist = Playlist::findOrFail($id);
+        $dataUrl = $request->input('cropped_image');
+
+        if (!preg_match('/^data:image\/(\w+);base64,/', $dataUrl, $matches)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Format gambar tidak valid.',
+            ], 422);
+        }
+
+        $imageData = base64_decode(substr($dataUrl, strpos($dataUrl, ',') + 1));
+        if ($imageData === false) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal memproses data gambar.',
+            ], 422);
+        }
+
+        $dir = public_path('image/playlists');
+        if (!is_dir($dir)) {
+            mkdir($dir, 0755, true);
+        }
+
+        // Hapus file kover kustom sebelumnya jika ada
+        if ($playlist->image && str_starts_with($playlist->image, 'image/playlists/')) {
+            $oldPath = public_path($playlist->image);
+            if (is_file($oldPath)) {
+                @unlink($oldPath);
+            }
+        }
+
+        $filename = 'playlist_' . $playlist->id . '_' . time() . '.jpg';
+        file_put_contents($dir . DIRECTORY_SEPARATOR . $filename, $imageData);
+
+        $relativePath = 'image/playlists/' . $filename;
+        $playlist->update(['image' => $relativePath]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Gambar sampul playlist berhasil diperbarui!',
+            'image' => $relativePath,
+            'playlist' => $playlist,
+        ]);
+    }
+
+    /**
      * Hapus playlist.
      */
     public function destroy($id)

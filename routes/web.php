@@ -25,6 +25,7 @@ Route::prefix('api')->group(function () {
     Route::get('/playlists/{id}', [PlaylistController::class, 'show'])->name('api.playlists.show');
     Route::post('/playlists', [PlaylistController::class, 'store'])->name('api.playlists.store');
     Route::put('/playlists/{id}', [PlaylistController::class, 'update'])->name('api.playlists.update');
+    Route::post('/playlists/{id}/image', [PlaylistController::class, 'updateImage'])->name('api.playlists.updateImage');
     Route::post('/playlists/{id}/add', [PlaylistController::class, 'addSong'])->name('api.playlists.addSong');
     Route::delete('/playlists/{id}/songs/{musicId}', [PlaylistController::class, 'removeSong'])->name('api.playlists.removeSong');
     Route::delete('/playlists/{id}', [PlaylistController::class, 'destroy'])->name('api.playlists.destroy');
