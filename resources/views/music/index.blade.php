@@ -297,12 +297,12 @@
             </div>
         </div>
 
-        <!-- Profil Tim Pengembang (Kelompok 2 Kelas 17.3A.27) -->
+        <!-- Profil Tim Pengembang (Kelompok 2 Kelas 17.5A.27) -->
         <div class="bg-gradient-to-r from-slate-800 to-slate-900 rounded-3xl p-10 border border-slate-700 text-center relative overflow-hidden shadow-2xl">
             <div class="relative z-10">
                 <span class="text-xs font-bold text-emerald-400 uppercase tracking-widest bg-emerald-950 px-3 py-1 rounded-full border border-emerald-800">Project Akhir Sistem Multimedia</span>
                 <h3 class="text-3xl font-extrabold text-white mt-3 mb-2">Tim Pengembang (Kelompok 2)</h3>
-                <p class="text-slate-400 text-sm mb-10">Kelas 17.3A.27 • Universitas Bina Sarana Informatika</p>
+                <p class="text-slate-400 text-sm mb-10">Kelas 17.5A.27 • Universitas Bina Sarana Informatika</p>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 text-left">
                     <!-- Paul Siagian -->

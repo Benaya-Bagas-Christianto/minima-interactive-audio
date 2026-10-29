@@ -258,7 +258,7 @@ Jika menggunakan Laragon:
 
 ## Tim Pengembang
 
-Proyek ini dikembangkan oleh Kelompok 2 (Kelas 17.3A.27) untuk pemenuhan Tugas Proyek Akhir Mata Kuliah Sistem Multimedia:
+Proyek ini dikembangkan oleh Kelompok 2 (Kelas 17.5A.27) untuk pemenuhan Tugas Proyek Akhir Mata Kuliah Sistem Multimedia:
 
 1. Paul Siagian (NIM: 17240668)
 2. Arla Raesa Isalim (NIM: 17240410)
