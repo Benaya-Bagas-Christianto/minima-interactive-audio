@@ -3134,7 +3134,7 @@ function deleteReview(id) {
     });
 }
 
-/* ==================== 9. SHADCN ALERT NOTIFICATION & CONFIRMATION ==================== */
+/* ==================== 9. SHADCN ALERT NOTIFICATION & CONFIRMATION (MINIMA THEME) ==================== */
 let toastTimeoutId = null;
 
 function showToast(message, type = 'success') {
@@ -3145,18 +3145,18 @@ function showToast(message, type = 'success') {
     if (toastTimeoutId) clearTimeout(toastTimeoutId);
 
     const variantStyles = {
-        default: 'border-slate-800 bg-slate-950 text-slate-100',
-        success: 'border-emerald-500/50 bg-slate-950 text-slate-100',
-        warning: 'border-amber-500/50 bg-slate-950 text-amber-500',
-        error: 'border-red-500/50 bg-slate-950 text-red-500',
-        info: 'border-blue-500/50 bg-slate-950 text-blue-500'
+        default: 'border-slate-700 bg-slate-800/95 text-white',
+        success: 'border-emerald-500/40 bg-slate-800/95 text-white',
+        warning: 'border-emerald-500/40 bg-slate-800/95 text-white',
+        error: 'border-red-500/40 bg-slate-800/95 text-white',
+        info: 'border-emerald-500/40 bg-slate-800/95 text-white'
     };
 
     const icons = {
-        success: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-500"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>',
-        error: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-red-500"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>',
-        warning: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-amber-500"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>',
-        info: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>'
+        success: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-400"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>',
+        error: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-red-400"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>',
+        warning: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-400"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>',
+        info: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-400"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>'
     };
 
     const variantClass = variantStyles[type] || variantStyles.success;
@@ -3165,12 +3165,12 @@ function showToast(message, type = 'success') {
     const alertEl = document.createElement('div');
     alertEl.id = 'minimaToast';
     alertEl.setAttribute('role', 'alert');
-    alertEl.className = `fixed top-20 right-6 z-[100] w-auto min-w-[260px] max-w-[400px] rounded-lg border px-4 py-3 shadow-lg shadow-black/25 backdrop-blur-md transition-all duration-200 opacity-0 -translate-y-2 ${variantClass}`;
+    alertEl.className = `fixed top-20 right-6 z-[100] w-auto min-w-[280px] max-w-[400px] rounded-2xl border px-4 py-3.5 shadow-2xl shadow-black/40 backdrop-blur-md transition-all duration-200 opacity-0 -translate-y-2 ${variantClass}`;
     alertEl.innerHTML = `
         <div class="flex items-center gap-2">
             <div class="grow flex items-center">
-                <span class="me-3 inline-flex shrink-0">${iconSvg}</span>
-                <p class="text-sm font-medium text-slate-100">${escapeHtml(message)}</p>
+                <span class="me-3 inline-flex shrink-0 w-7 h-7 rounded-xl bg-emerald-950/80 border border-emerald-500/30 items-center justify-center">${iconSvg}</span>
+                <p class="text-sm font-semibold text-white">${escapeHtml(message)}</p>
             </div>
         </div>
     `;
@@ -3191,38 +3191,32 @@ function showToast(message, type = 'success') {
 function showConfirmAlert({
     title = 'Konfirmasi',
     description = 'Apakah Anda yakin ingin melanjutkan?',
-    confirmText = 'Ya, Lanjutkan',
+    confirmText = 'Hapus',
     cancelText = 'Batal',
-    variant = 'warning',
     onConfirm = null
 } = {}) {
     const existing = document.getElementById('minimaConfirmBackdrop');
     if (existing) existing.remove();
 
-    const borderClass = variant === 'error' ? 'border-red-500/50' : 'border-amber-500/50';
-    const iconColorClass = variant === 'error' ? 'text-red-500' : 'text-amber-500';
-
     const backdrop = document.createElement('div');
     backdrop.id = 'minimaConfirmBackdrop';
-    backdrop.className = 'fixed inset-0 z-[100] bg-black/50 backdrop-blur-[2px] flex items-start justify-center pt-24 px-4 transition-opacity duration-150 opacity-0';
+    backdrop.className = 'fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center px-4 transition-opacity duration-150 opacity-0';
     backdrop.innerHTML = `
-        <div role="alert" class="relative rounded-lg border ${borderClass} z-[101] w-full max-w-[400px] bg-slate-950 p-4 shadow-lg shadow-black/30 transition-transform duration-150 scale-95">
-            <div class="flex gap-2">
-                <div class="flex grow gap-3">
-                    <span class="mt-0.5 shrink-0 ${iconColorClass}">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
-                    </span>
-                    <div class="grow space-y-1">
-                        <h5 class="text-sm font-medium text-slate-100">${escapeHtml(title)}</h5>
-                        <div class="text-sm text-slate-400 leading-relaxed">${escapeHtml(description)}</div>
-                        <div class="flex items-center justify-end gap-2 pt-3">
-                            <button type="button" id="minimaConfirmCancelBtn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-xs font-medium transition-colors border border-slate-800 bg-slate-900 text-slate-300 hover:bg-slate-800 hover:text-white h-8 px-3">
-                                ${escapeHtml(cancelText)}
-                            </button>
-                            <button type="button" id="minimaConfirmOkBtn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-xs font-medium transition-colors bg-red-600 text-white hover:bg-red-500 h-8 px-3">
-                                ${escapeHtml(confirmText)}
-                            </button>
-                        </div>
+        <div role="alert" class="relative rounded-2xl border border-slate-700 z-[101] w-full max-w-[400px] bg-slate-800 p-5 shadow-2xl shadow-black/50 transition-transform duration-150 scale-95">
+            <div class="flex gap-3.5">
+                <span class="mt-0.5 shrink-0 w-10 h-10 rounded-xl bg-emerald-950/80 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+                </span>
+                <div class="grow space-y-1.5">
+                    <h5 class="text-base font-bold text-white">${escapeHtml(title)}</h5>
+                    <div class="text-sm text-slate-300 leading-relaxed">${escapeHtml(description)}</div>
+                    <div class="flex items-center justify-end gap-2.5 pt-3">
+                        <button type="button" id="minimaConfirmCancelBtn" class="inline-flex items-center justify-center whitespace-nowrap rounded-xl text-xs font-semibold transition-colors bg-slate-700 hover:bg-slate-600 text-slate-200 hover:text-white h-9 px-4">
+                            ${escapeHtml(cancelText)}
+                        </button>
+                        <button type="button" id="minimaConfirmOkBtn" class="inline-flex items-center justify-center whitespace-nowrap rounded-xl text-xs font-bold transition-colors bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-lg shadow-emerald-500/20 h-9 px-4">
+                            ${escapeHtml(confirmText)}
+                        </button>
                     </div>
                 </div>
             </div>
