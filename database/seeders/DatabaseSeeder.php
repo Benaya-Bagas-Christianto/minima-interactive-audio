@@ -88,13 +88,24 @@ class DatabaseSeeder extends Seeder
         $this->command->info('Seeding Musics (' . count($musicData) . ' songs)...');
         $createdMusicIds = [];
         foreach ($musicData as $index => $m) {
+            $songNumber = $index + 1;
+            $localAudioRel = "audio/{$songNumber}.mp3";
+            $hasLocalMp3 = File::exists(public_path($localAudioRel)) && File::size(public_path($localAudioRel)) > 50000;
+
             $existing = Music::where('title', $m['title'])->where('artist', $m['artist'])->first();
-            $audioUrl = ($existing && str_contains($existing->audio_url, 'apple.com')) 
-                ? $existing->audio_url 
-                : ($sampleAudios[$index % count($sampleAudios)]);
-            $vidId = ($existing && !empty($existing->video_id)) 
-                ? $existing->video_id 
-                : ($videoMap[$m['title']] ?? 'fJ9rUzIMcZQ');
+            $audioUrl = !empty($m['audio_url'])
+                ? $m['audio_url']
+                : ($hasLocalMp3
+                    ? $localAudioRel
+                    : (($existing && str_contains($existing->audio_url, 'apple.com'))
+                        ? $existing->audio_url
+                        : ($sampleAudios[$index % count($sampleAudios)])));
+
+            $vidId = !empty($m['video_id'])
+                ? $m['video_id']
+                : (($existing && !empty($existing->video_id))
+                    ? $existing->video_id
+                    : ($videoMap[$m['title']] ?? 'fJ9rUzIMcZQ'));
 
             $music = Music::updateOrCreate(
                 ['title' => $m['title'], 'artist' => $m['artist']],
