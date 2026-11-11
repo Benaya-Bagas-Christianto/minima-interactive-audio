@@ -170,6 +170,12 @@
                     <span class="hidden sm:inline">Lirik</span>
                 </button>
 
+                <button onclick="openVideoModalForCurrentSong()" class="h-9 px-3.5 bg-slate-800/90 hover:bg-red-950/70 border border-slate-700/80 hover:border-red-500/50 rounded-xl text-xs font-semibold text-red-500 hover:text-red-400 transition-colors inline-flex items-center gap-1.5 whitespace-nowrap flex-shrink-0" title="Tonton Video Musik Resmi">
+                    <svg class="w-4 h-4 fill-current flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>youtube</title><path fill="currentColor" d="m10 15l5.19-3L10 9zm11.56-7.83c.13.47.22 1.1.28 1.9c.07.8.1 1.49.1 2.09L22 12c0 2.19-.16 3.8-.44 4.83c-.25.9-.83 1.48-1.73 1.73c-.47.13-1.33.22-2.65.28c-1.3.07-2.49.1-3.59.1L12 19c-4.19 0-6.8-.16-7.83-.44c-.9-.25-1.48-.83-1.73-1.73c-.13-.47-.22-1.1-.28-1.9c-.07-.8-.1-1.49-.1-2.09L2 12c0-2.19.16-3.8.44-4.83c.25-.9.83-1.48 1.73-1.73c.47-.13 1.33-.22 2.65-.28c1.3-.07 2.49-.1 3.59-.1L12 5c4.19 0 6.8.16 7.83.44c.9.25 1.48.83 1.73 1.73"/></svg>
+                    <span class="hidden sm:inline">Video MV</span>
+                </button>
+
+
                 <button onclick="closeAudioPlayer()" class="w-9 h-9 flex-shrink-0 inline-flex items-center justify-center text-slate-400 hover:text-red-400 bg-slate-800/60 hover:bg-slate-800 rounded-xl border border-slate-700/80 hover:border-red-500/50 transition-colors" title="Hentikan & Tutup Pemutar Musik">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
@@ -203,7 +209,7 @@
             <div id="vinyl3dContainer" class="vinyl-canvas-container flex items-center justify-center relative cursor-grab active:cursor-grabbing select-none">
                 <!-- Hint badge overlay -->
                 <div class="absolute top-3 left-3 z-10 bg-slate-950/80 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-700/60 text-[11px] font-medium text-slate-300 flex items-center gap-1.5 pointer-events-none shadow-lg">
-                    <span class="text-emerald-400">💡</span>
+                    <svg class="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     <span><strong>Klik piringan</strong> untuk Play/Pause • <strong>Geser</strong> untuk rotasi sudut pandang 3D</span>
                 </div>
                 <p id="vinylLoadingText" class="text-slate-400 text-sm">Memuat model 3D Three.js...</p>
@@ -313,6 +319,133 @@
                         <input type="range" id="lyricsProgressBar" min="0" max="100" value="0" step="0.1" class="player-seek-slider" title="Geser untuk memilih menit lagu">
                     </div>
                     <span id="lyricsDuration" class="w-10 text-left font-mono font-medium text-slate-400">3:30</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dedicated Video MV Modal (YouTube Player HD) -->
+    <div id="videoModal" class="modal">
+        <div class="bg-slate-900 border border-slate-700/80 rounded-3xl max-w-4xl w-full mx-4 p-5 sm:p-6 shadow-2xl relative overflow-hidden flex flex-col max-h-[92vh]">
+            <!-- Modal Header -->
+            <div class="flex justify-between items-center mb-4 border-b border-slate-800 pb-3 flex-shrink-0">
+                <div class="flex items-center space-x-2.5">
+                    <svg class="w-6 h-6 text-red-500 fill-current flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>youtube</title><path fill="currentColor" d="m10 15l5.19-3L10 9zm11.56-7.83c.13.47.22 1.1.28 1.9c.07.8.1 1.49.1 2.09L22 12c0 2.19-.16 3.8-.44 4.83c-.25.9-.83 1.48-1.73 1.73c-.47.13-1.33.22-2.65.28c-1.3.07-2.49.1-3.59.1L12 19c-4.19 0-6.8-.16-7.83-.44c-.9-.25-1.48-.83-1.73-1.73c-.13-.47-.22-1.1-.28-1.9c-.07-.8-.1-1.49-.1-2.09L2 12c0-2.19.16-3.8.44-4.83c.25-.9.83-1.48 1.73-1.73c.47-.13 1.33-.22 2.65-.28c1.3-.07 2.49-.1 3.59-.1L12 5c4.19 0 6.8.16 7.83.44c.9.25 1.48.83 1.73 1.73"/></svg>
+                    <h3 class="text-lg sm:text-xl font-bold text-white tracking-wide flex items-center gap-2">
+                        <span id="videoModalTitleHeader">Video Musik Resmi</span>
+                        <span id="videoModalModeBadge" class="text-slate-400 text-xs font-semibold px-2.5 py-0.5 bg-slate-800/90 border border-slate-700/80 rounded-full">
+                            YouTube Player HD
+                        </span>
+                    </h3>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button id="videoToggleModeBtn" onclick="toggleVideoVisualizerMode()" class="h-8 px-3 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-emerald-400 border border-slate-700 flex items-center gap-1.5 transition-colors shadow" title="Ganti antara Video dan Visualizer">
+                        <svg class="w-3.5 h-3.5 text-emerald-400" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+                        <span id="videoToggleModeText">Mode Visualizer</span>
+                    </button>
+                    <button onclick="closeVideoModal()" class="text-slate-400 hover:text-white text-2xl transition-colors p-1 leading-none" title="Tutup">&times;</button>
+                </div>
+            </div>
+
+            <!-- Video Player Iframe & Visualizer Container (16:9 Responsive) -->
+            <div class="relative w-full aspect-video rounded-2xl overflow-hidden bg-black shadow-2xl border border-slate-800 flex-shrink-0">
+                <!-- 1. Video Iframe Layer with Loading Shield (Mencegah tampilan error YouTube bocor ke layar) -->
+                <div id="videoIframeWrapper" class="w-full h-full relative flex items-center justify-center">
+                    <div id="videoLoadingCurtain" class="absolute inset-0 bg-slate-950 flex flex-col items-center justify-center z-10 transition-opacity duration-300">
+                        <div class="w-8 h-8 border-2 border-red-500 border-t-transparent rounded-full animate-spin mb-2"></div>
+                        <p class="text-xs text-slate-400 font-medium">Menyiapkan video musik...</p>
+                    </div>
+                    <div id="mainVideoMount" class="w-full h-full"></div>
+                </div>
+
+                <!-- 2. Audiovisualizer Fallback Layer (Estetik, Bersih Tanpa Clutter & Bebas Emoji) -->
+                <div id="videoVisualizerFallback" onmousemove="handleVisualizerActivity()" onclick="handleVisualizerActivity()" class="hidden absolute inset-0 w-full h-full flex flex-col justify-between p-5 sm:p-6 select-none overflow-hidden z-20">
+                    <!-- Dynamic Backdrop Image with blur & vignette -->
+                    <div id="visualizerBackdrop" class="absolute inset-0 bg-cover bg-center transition-all duration-700 transform scale-105"></div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/75 to-slate-950/50 backdrop-blur-[2px]"></div>
+
+                    <!-- Center Artwork & Title (Bersih & Elegan) -->
+                    <div class="relative z-10 flex flex-col items-center justify-center text-center my-auto">
+                        <div class="relative group mb-3 cursor-pointer select-none" onclick="toggleVisualizerPlayback()" title="Klik untuk Play / Pause">
+                            <img id="visualizerCenterImg" src="{{ asset('image/queen1.jpg') }}" class="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl object-cover shadow-2xl border-2 border-emerald-500/50 ring-4 ring-emerald-500/20 transition-transform group-hover:scale-105">
+                            <button id="visPlayPauseBtn" onclick="event.stopPropagation(); toggleVisualizerPlayback()" class="absolute inset-0 m-auto w-11 h-11 rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 flex items-center justify-center shadow-2xl" title="Play / Pause Audio">
+                                <svg id="visPlayIcon" class="w-5 h-5 fill-current ml-0.5" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                <svg id="visPauseIcon" class="w-5 h-5 fill-current hidden" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                            </button>
+                        </div>
+                        <h3 id="visualizerTitle" class="text-lg sm:text-2xl font-black text-white tracking-wide truncate max-w-md">Blinding Lights</h3>
+                        <p id="visualizerArtist" class="text-xs sm:text-sm text-emerald-400 font-medium truncate max-w-md mt-0.5">The Weeknd</p>
+                    </div>
+
+                    <!-- Bottom Equalizer Bars & Seeker -->
+                    <div class="relative z-10">
+                        <div id="visEqualizerContainer" class="flex items-end justify-center gap-1 sm:gap-1.5 h-8 sm:h-9 mb-2">
+                            <!-- 16 animated visualizer bars -->
+                            <div class="visualizer-bar" style="animation-duration: 0.8s; animation-delay: 0.1s;"></div>
+                            <div class="visualizer-bar" style="animation-duration: 1.1s; animation-delay: 0.2s;"></div>
+                            <div class="visualizer-bar" style="animation-duration: 0.9s; animation-delay: 0.3s;"></div>
+                            <div class="visualizer-bar" style="animation-duration: 1.3s; animation-delay: 0.15s;"></div>
+                            <div class="visualizer-bar" style="animation-duration: 0.7s; animation-delay: 0.25s;"></div>
+                            <div class="visualizer-bar" style="animation-duration: 1.2s; animation-delay: 0.05s;"></div>
+                            <div class="visualizer-bar" style="animation-duration: 1.0s; animation-delay: 0.35s;"></div>
+                            <div class="visualizer-bar" style="animation-duration: 0.85s; animation-delay: 0.18s;"></div>
+                            <div class="visualizer-bar" style="animation-duration: 1.25s; animation-delay: 0.22s;"></div>
+                            <div class="visualizer-bar" style="animation-duration: 0.95s; animation-delay: 0.08s;"></div>
+                            <div class="visualizer-bar" style="animation-duration: 1.15s; animation-delay: 0.3s;"></div>
+                            <div class="visualizer-bar" style="animation-duration: 0.75s; animation-delay: 0.12s;"></div>
+                            <div class="visualizer-bar" style="animation-duration: 1.35s; animation-delay: 0.28s;"></div>
+                            <div class="visualizer-bar" style="animation-duration: 0.9s; animation-delay: 0.16s;"></div>
+                            <div class="visualizer-bar" style="animation-duration: 1.05s; animation-delay: 0.24s;"></div>
+                            <div class="visualizer-bar" style="animation-duration: 0.8s; animation-delay: 0.32s;"></div>
+                        </div>
+
+                        <!-- Progress Bar Inside Visualizer -->
+                        <div class="flex items-center space-x-2 text-xs text-slate-300 font-mono select-none">
+                            <span id="visCurrentTime" class="w-10 text-right">0:00</span>
+                            <div class="relative w-full flex items-center py-1">
+                                <input type="range" id="visProgressBar" min="0" max="100" value="0" step="0.1" class="player-seek-slider" oninput="seekVisualizerAudio(this.value)">
+                            </div>
+                            <span id="visDuration" class="w-10 text-left">3:20</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Video Info & Multi-Pillar Controls -->
+            <div class="mt-4 bg-slate-800/80 rounded-2xl p-4 border border-slate-700/70 shadow-lg flex-shrink-0">
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div class="flex items-center space-x-3 text-center sm:text-left truncate max-w-xs w-full sm:w-auto">
+                        <img id="videoModalCover" src="{{ asset('image/queen1.jpg') }}" class="w-12 h-12 rounded-xl object-cover shadow-md border border-slate-600 flex-shrink-0">
+                        <div class="truncate">
+                            <h4 id="videoModalTitle" class="text-sm font-bold text-white truncate">Bohemian Rhapsody</h4>
+                            <p id="videoModalArtist" class="text-xs text-slate-400 truncate">Queen</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center flex-wrap justify-center sm:justify-end gap-2">
+                        <button id="videoBtnSwitch3D" onclick="switchFromVideoTo3D()" class="h-9 px-3.5 rounded-xl bg-slate-900 hover:bg-slate-700 text-emerald-400 text-xs font-semibold border border-emerald-500/30 transition-colors inline-flex items-center gap-1.5 whitespace-nowrap" title="Beralih ke Piringan Hitam 3D">
+                            <svg class="w-4 h-4 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M16 3.937A9 9 0 1 0 21 12"/><path d="M11 12a1 1 0 1 0 2 0a1 1 0 1 0-2 0m8-8a1 1 0 1 0 2 0a1 1 0 1 0-2 0"/><path d="m20 4l-3.5 10l-2.5 2"/></g></svg>
+                            <span>Piringan 3D</span>
+                        </button>
+                        <button id="videoBtnSwitchLyrics" onclick="switchFromVideoToLyrics()" class="h-9 px-3.5 rounded-xl bg-slate-900 hover:bg-slate-700 text-emerald-400 text-xs font-semibold border border-emerald-500/30 transition-colors inline-flex items-center gap-1.5 whitespace-nowrap" title="Buka Lirik Lagu">
+                            <svg class="w-4 h-4 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M470.8 365.6c-.9-53.7-1.6-107.4-2.4-161.1c-.9-63.6-1.7-127.3-2.6-190.9c-.1-9.9-6.6-15.2-15.9-13.1c-25.8 5.9-51.7 11.7-77.5 17.5C306.7 32.7 241 47.5 175.3 62.2c-9.1 2-12.2 6.1-12.1 15.5c.2 7.5.3 14.9.4 22.4c1.3 90.7 2.5 181.4 3.7 272.1v9.8c-2.5-1.9-4.4-3.5-6.4-5c-17-12.6-36.1-17.4-56.9-14c-51.5 8.5-78.6 64.8-53.4 110.5c15.3 27.7 48.4 43.4 78.8 37.3c38-7.6 62.5-38.6 61.7-77.8c-.4-20.2-.8-40.4-1.1-60.7l-3-224.1c-.1-4.6 0-9.2 0-14c85.6-19.2 171.1-38.4 256.8-57.6c1.1 81.6 2.2 162.6 3.3 244.4c-1.7-1.3-2.6-2.1-3.6-2.9c-17.3-13.9-37.1-19.3-58.9-16c-54.2 8.2-83.1 71.4-49.5 117.3c17.9 24.4 42.6 35.1 72.6 30.4c30.3-4.8 50.1-23 59.9-52c3.6-10.6 3.4-21.4 3.2-32.2M115.6 489.4c-28.6.1-51.7-23.7-51.6-52.8s23.6-52.6 53-52.2c27.9.4 51.4 22.4 51.2 53.2c-.2 29.6-23.7 51.8-52.6 51.8m327.7-438c0 .9-2.1 2.3-3.4 2.6c-12.5 3-25 5.8-37.5 8.6c-20 4.5-40.1 8.9-60.1 13.4c-41.4 9.3-82.8 18.5-124.3 27.8c-9.6 2.2-19.3 4.3-28.9 6.5c-.6.1-1.2.1-3 .3c0-8.8-.1-17.4.2-25.9c0-.9 2.2-2.2 3.5-2.5c14.7-3.4 29.5-6.7 44.3-10c19.8-4.4 39.5-8.8 59.3-13.3l113.7-25.5c10.6-2.4 21.2-4.9 31.9-7.3c1.1-.2 2.2-.2 4.4-.4c.1 8.9.2 17.3-.1 25.7m-47.4 377c-28.1 0-52-24.1-52-52.4c0-28.6 23.8-52.7 52.1-52.7c28.9 0 52.3 23.7 52.3 53.1c-.2 28.3-24 52-52.4 52"/><path fill="currentColor" d="M64 436.6c.1-29.1 23.6-52.6 53-52.2c27.9.4 51.4 22.4 51.2 53.2c-.2 29.6-23.7 51.8-52.6 51.8c-28.6.1-51.7-23.7-51.6-52.8m384.2-60.2c0-29.4-23.3-53.1-52.3-53.1c-28.3 0-52.1 24.1-52.1 52.7c0 28.2 24 52.4 52 52.4c28.5 0 52.3-23.7 52.4-52m-259-266c9.6-2.2 19.3-4.3 28.9-6.5c41.4-9.3 82.8-18.6 124.3-27.8c20-4.5 40.1-8.9 60.1-13.4c12.5-2.8 25-5.6 37.5-8.6c1.3-.3 3.4-1.7 3.4-2.6c.3-8.4.2-16.9.2-25.8c-2.2.2-3.3.1-4.4.4c-10.6 2.4-21.2 4.9-31.9 7.3L293.6 58.9c-19.8 4.4-39.5 8.8-59.3 13.3c-14.8 3.3-29.5 6.6-44.3 10c-1.4.3-3.5 1.6-3.5 2.5c-.3 8.6-.2 17.1-.2 25.9c1.7-.1 2.3-.1 2.9-.2" opacity=".7"/></svg>
+                            <span>Lirik</span>
+                        </button>
+                        <a id="videoModalYtLink" href="#" target="_blank" rel="noopener noreferrer" class="h-9 px-3.5 rounded-xl bg-red-600/20 hover:bg-red-600 text-slate-200 hover:text-white text-xs font-semibold border border-red-500/40 transition-colors inline-flex items-center gap-1.5 whitespace-nowrap" title="Buka langsung di YouTube">
+                            <svg class="w-4 h-4 text-red-500 group-hover:text-white fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>youtube</title><path fill="currentColor" d="m10 15l5.19-3L10 9zm11.56-7.83c.13.47.22 1.1.28 1.9c.07.8.1 1.49.1 2.09L22 12c0 2.19-.16 3.8-.44 4.83c-.25.9-.83 1.48-1.73 1.73c-.47.13-1.33.22-2.65.28c-1.3.07-2.49.1-3.59.1L12 19c-4.19 0-6.8-.16-7.83-.44c-.9-.25-1.48-.83-1.73-1.73c-.13-.47-.22-1.1-.28-1.9c-.07-.8-.1-1.49-.1-2.09L2 12c0-2.19.16-3.8.44-4.83c.25-.9.83-1.48 1.73-1.73c.47-.13 1.33-.22 2.65-.28c1.3-.07 2.49-.1 3.59-.1L12 5c4.19 0 6.8.16 7.83.44c.9.25 1.48.83 1.73 1.73"/></svg>
+                            <span>Tonton di YouTube</span>
+                            <svg class="w-3.5 h-3.5 text-slate-300 ml-0.5 inline flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Helpful Hint -->
+                <div class="mt-2.5 pt-2 border-t border-slate-700/40 flex items-center justify-between text-[11px] text-slate-400">
+                    <span class="flex items-center gap-1.5">
+                        <svg class="w-3.5 h-3.5 text-slate-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <span>Jika pemutaran video dibatasi oleh label hak cipta lagu, gunakan tombol <strong class="text-slate-300">Tonton di YouTube</strong> atau beralih ke <strong class="text-emerald-400">Mode Visualizer</strong>.</span>
+                    </span>
+                    <span class="text-slate-500 hidden sm:inline font-mono">YouTube Official</span>
                 </div>
             </div>
         </div>

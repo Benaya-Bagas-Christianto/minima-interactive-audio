@@ -33,6 +33,9 @@
                                     <button onclick="event.stopPropagation(); openLyricsWithSong('{{ addslashes($song->title) }}', '{{ addslashes($song->artist) }}', '{{ asset($song->image ?? 'image/queen1.jpg') }}', {{ $song->id }}, '{{ $song->audio_url }}', '{{ $song->video_id }}')" class="w-9 h-9 bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-emerald-500/40 rounded-full flex items-center justify-center shadow-xl transition-transform hover:scale-110" title="Putar dengan Lirik">
                                         <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M470.8 365.6c-.9-53.7-1.6-107.4-2.4-161.1c-.9-63.6-1.7-127.3-2.6-190.9c-.1-9.9-6.6-15.2-15.9-13.1c-25.8 5.9-51.7 11.7-77.5 17.5C306.7 32.7 241 47.5 175.3 62.2c-9.1 2-12.2 6.1-12.1 15.5c.2 7.5.3 14.9.4 22.4c1.3 90.7 2.5 181.4 3.7 272.1v9.8c-2.5-1.9-4.4-3.5-6.4-5c-17-12.6-36.1-17.4-56.9-14c-51.5 8.5-78.6 64.8-53.4 110.5c15.3 27.7 48.4 43.4 78.8 37.3c38-7.6 62.5-38.6 61.7-77.8c-.4-20.2-.8-40.4-1.1-60.7l-3-224.1c-.1-4.6 0-9.2 0-14c85.6-19.2 171.1-38.4 256.8-57.6c1.1 81.6 2.2 162.6 3.3 244.4c-1.7-1.3-2.6-2.1-3.6-2.9c-17.3-13.9-37.1-19.3-58.9-16c-54.2 8.2-83.1 71.4-49.5 117.3c17.9 24.4 42.6 35.1 72.6 30.4c30.3-4.8 50.1-23 59.9-52c3.6-10.6 3.4-21.4 3.2-32.2M115.6 489.4c-28.6.1-51.7-23.7-51.6-52.8s23.6-52.6 53-52.2c27.9.4 51.4 22.4 51.2 53.2c-.2 29.6-23.7 51.8-52.6 51.8m327.7-438c0 .9-2.1 2.3-3.4 2.6c-12.5 3-25 5.8-37.5 8.6c-20 4.5-40.1 8.9-60.1 13.4c-41.4 9.3-82.8 18.5-124.3 27.8c-9.6 2.2-19.3 4.3-28.9 6.5c-.6.1-1.2.1-3 .3c0-8.8-.1-17.4.2-25.9c0-.9 2.2-2.2 3.5-2.5c14.7-3.4 29.5-6.7 44.3-10c19.8-4.4 39.5-8.8 59.3-13.3l113.7-25.5c10.6-2.4 21.2-4.9 31.9-7.3c1.1-.2 2.2-.2 4.4-.4c.1 8.9.2 17.3-.1 25.7m-47.4 377c-28.1 0-52-24.1-52-52.4c0-28.6 23.8-52.7 52.1-52.7c28.9 0 52.3 23.7 52.3 53.1c-.2 28.3-24 52-52.4 52"/><path fill="currentColor" d="M64 436.6c.1-29.1 23.6-52.6 53-52.2c27.9.4 51.4 22.4 51.2 53.2c-.2 29.6-23.7 51.8-52.6 51.8c-28.6.1-51.7-23.7-51.6-52.8m384.2-60.2c0-29.4-23.3-53.1-52.3-53.1c-28.3 0-52.1 24.1-52.1 52.7c0 28.2 24 52.4 52 52.4c28.5 0 52.3-23.7 52.4-52m-259-266c9.6-2.2 19.3-4.3 28.9-6.5c41.4-9.3 82.8-18.6 124.3-27.8c20-4.5 40.1-8.9 60.1-13.4c12.5-2.8 25-5.6 37.5-8.6c1.3-.3 3.4-1.7 3.4-2.6c.3-8.4.2-16.9.2-25.8c-2.2.2-3.3.1-4.4.4c-10.6 2.4-21.2 4.9-31.9 7.3L293.6 58.9c-19.8 4.4-39.5 8.8-59.3 13.3c-14.8 3.3-29.5 6.6-44.3 10c-1.4.3-3.5 1.6-3.5 2.5c-.3 8.6-.2 17.1-.2 25.9c1.7-.1 2.3-.1 2.9-.2" opacity=".7"/></svg>
                                     </button>
+                                    <button onclick="event.stopPropagation(); openVideoModal({{ $song->id }}, '{{ addslashes($song->title) }}', '{{ addslashes($song->artist) }}', '{{ $song->video_id }}', '{{ asset($song->image ?? 'image/queen1.jpg') }}')" class="w-9 h-9 bg-slate-800 hover:bg-slate-700 text-red-500 border border-red-500/40 hover:border-red-500 rounded-full flex items-center justify-center shadow-xl transition-transform hover:scale-110" title="Tonton Video MV">
+                                        <svg class="w-4 h-4 fill-current text-red-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>youtube</title><path fill="currentColor" d="m10 15l5.19-3L10 9zm11.56-7.83c.13.47.22 1.1.28 1.9c.07.8.1 1.49.1 2.09L22 12c0 2.19-.16 3.8-.44 4.83c-.25.9-.83 1.48-1.73 1.73c-.47.13-1.33.22-2.65.28c-1.3.07-2.49.1-3.59.1L12 19c-4.19 0-6.8-.16-7.83-.44c-.9-.25-1.48-.83-1.73-1.73c-.13-.47-.22-1.1-.28-1.9c-.07-.8-.1-1.49-.1-2.09L2 12c0-2.19.16-3.8.44-4.83c.25-.9.83-1.48 1.73-1.73c.47-.13 1.33-.22 2.65-.28c1.3-.07 2.49-.1 3.59-.1L12 5c4.19 0 6.8.16 7.83.44c.9.25 1.48.83 1.73 1.73"/></svg>
+                                    </button>
                                 </div>
                                 <span class="absolute top-2.5 right-2.5 bg-black/70 backdrop-blur-md px-2 py-0.5 rounded-md text-xs font-bold text-yellow-400 flex items-center gap-1 border border-white/10">
                                     ★ {{ $song->rating }}
@@ -70,6 +73,9 @@
                                     </button>
                                     <button onclick="event.stopPropagation(); openLyricsWithSong('{{ addslashes($song->title) }}', '{{ addslashes($song->artist) }}', '{{ asset($song->image ?? 'image/queen1.jpg') }}', {{ $song->id }}, '{{ $song->audio_url }}', '{{ $song->video_id }}')" class="w-8 h-8 bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-emerald-500/40 rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-110" title="Putar dengan Lirik">
                                         <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M470.8 365.6c-.9-53.7-1.6-107.4-2.4-161.1c-.9-63.6-1.7-127.3-2.6-190.9c-.1-9.9-6.6-15.2-15.9-13.1c-25.8 5.9-51.7 11.7-77.5 17.5C306.7 32.7 241 47.5 175.3 62.2c-9.1 2-12.2 6.1-12.1 15.5c.2 7.5.3 14.9.4 22.4c1.3 90.7 2.5 181.4 3.7 272.1v9.8c-2.5-1.9-4.4-3.5-6.4-5c-17-12.6-36.1-17.4-56.9-14c-51.5 8.5-78.6 64.8-53.4 110.5c15.3 27.7 48.4 43.4 78.8 37.3c38-7.6 62.5-38.6 61.7-77.8c-.4-20.2-.8-40.4-1.1-60.7l-3-224.1c-.1-4.6 0-9.2 0-14c85.6-19.2 171.1-38.4 256.8-57.6c1.1 81.6 2.2 162.6 3.3 244.4c-1.7-1.3-2.6-2.1-3.6-2.9c-17.3-13.9-37.1-19.3-58.9-16c-54.2 8.2-83.1 71.4-49.5 117.3c17.9 24.4 42.6 35.1 72.6 30.4c30.3-4.8 50.1-23 59.9-52c3.6-10.6 3.4-21.4 3.2-32.2M115.6 489.4c-28.6.1-51.7-23.7-51.6-52.8s23.6-52.6 53-52.2c27.9.4 51.4 22.4 51.2 53.2c-.2 29.6-23.7 51.8-52.6 51.8m327.7-438c0 .9-2.1 2.3-3.4 2.6c-12.5 3-25 5.8-37.5 8.6c-20 4.5-40.1 8.9-60.1 13.4c-41.4 9.3-82.8 18.5-124.3 27.8c-9.6 2.2-19.3 4.3-28.9 6.5c-.6.1-1.2.1-3 .3c0-8.8-.1-17.4.2-25.9c0-.9 2.2-2.2 3.5-2.5c14.7-3.4 29.5-6.7 44.3-10c19.8-4.4 39.5-8.8 59.3-13.3l113.7-25.5c10.6-2.4 21.2-4.9 31.9-7.3c1.1-.2 2.2-.2 4.4-.4c.1 8.9.2 17.3-.1 25.7m-47.4 377c-28.1 0-52-24.1-52-52.4c0-28.6 23.8-52.7 52.1-52.7c28.9 0 52.3 23.7 52.3 53.1c-.2 28.3-24 52-52.4 52"/><path fill="currentColor" d="M64 436.6c.1-29.1 23.6-52.6 53-52.2c27.9.4 51.4 22.4 51.2 53.2c-.2 29.6-23.7 51.8-52.6 51.8c-28.6.1-51.7-23.7-51.6-52.8m384.2-60.2c0-29.4-23.3-53.1-52.3-53.1c-28.3 0-52.1 24.1-52.1 52.7c0 28.2 24 52.4 52 52.4c28.5 0 52.3-23.7 52.4-52m-259-266c9.6-2.2 19.3-4.3 28.9-6.5c41.4-9.3 82.8-18.6 124.3-27.8c20-4.5 40.1-8.9 60.1-13.4c12.5-2.8 25-5.6 37.5-8.6c1.3-.3 3.4-1.7 3.4-2.6c.3-8.4.2-16.9.2-25.8c-2.2.2-3.3.1-4.4.4c-10.6 2.4-21.2 4.9-31.9 7.3L293.6 58.9c-19.8 4.4-39.5 8.8-59.3 13.3c-14.8 3.3-29.5 6.6-44.3 10c-1.4.3-3.5 1.6-3.5 2.5c-.3 8.6-.2 17.1-.2 25.9c1.7-.1 2.3-.1 2.9-.2" opacity=".7"/></svg>
+                                    </button>
+                                    <button onclick="event.stopPropagation(); openVideoModal({{ $song->id }}, '{{ addslashes($song->title) }}', '{{ addslashes($song->artist) }}', '{{ $song->video_id }}', '{{ asset($song->image ?? 'image/queen1.jpg') }}')" class="w-8 h-8 bg-slate-800 hover:bg-slate-700 text-red-500 border border-red-500/40 hover:border-red-500 rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-110" title="Tonton Video MV">
+                                        <svg class="w-3.5 h-3.5 fill-current text-red-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>youtube</title><path fill="currentColor" d="m10 15l5.19-3L10 9zm11.56-7.83c.13.47.22 1.1.28 1.9c.07.8.1 1.49.1 2.09L22 12c0 2.19-.16 3.8-.44 4.83c-.25.9-.83 1.48-1.73 1.73c-.47.13-1.33.22-2.65.28c-1.3.07-2.49.1-3.59.1L12 19c-4.19 0-6.8-.16-7.83-.44c-.9-.25-1.48-.83-1.73-1.73c-.13-.47-.22-1.1-.28-1.9c-.07-.8-.1-1.49-.1-2.09L2 12c0-2.19.16-3.8.44-4.83c.25-.9.83-1.48 1.73-1.73c.47-.13 1.33-.22 2.65-.28c1.3-.07 2.49-.1 3.59-.1L12 5c4.19 0 6.8.16 7.83.44c.9.25 1.48.83 1.73 1.73"/></svg>
                                     </button>
                                 </div>
                                 <span class="absolute top-2 right-2 bg-black/70 backdrop-blur-md px-1.5 py-0.5 rounded-md text-[11px] font-bold text-yellow-400 flex items-center gap-0.5 border border-white/10">
@@ -190,6 +196,7 @@
         </div>
     </section>
 
+
     <!-- ==================== 3. PLAYLISTS SECTION ==================== -->
     <section id="playlists" class="section hidden transition-opacity duration-300">
         <div class="flex justify-between items-center mb-8">
@@ -217,8 +224,8 @@
 
         <div class="flex flex-col md:flex-row items-center md:items-end gap-8 mb-8 bg-gradient-to-b from-slate-800 to-slate-900/90 p-8 rounded-2xl border border-slate-700/60 shadow-2xl">
             <div class="relative group w-48 h-48 flex-shrink-0">
-                <div id="playlistViewImage" class="w-full h-full bg-slate-700 rounded-2xl shadow-2xl flex items-center justify-center text-5xl overflow-hidden border-2 border-emerald-500/30">
-                    🎵
+                <div id="playlistViewImage" class="w-full h-full bg-slate-750 rounded-2xl shadow-2xl flex items-center justify-center overflow-hidden border-2 border-emerald-500/30">
+                    <svg class="w-16 h-16 text-slate-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
                 </div>
                 <button type="button" onclick="triggerPlaylistImageUpload()" title="Ganti & Crop Gambar Sampul Playlist" class="absolute bottom-2.5 left-2.5 z-10 w-10 h-10 rounded-xl bg-slate-900/90 hover:bg-emerald-500 text-emerald-400 hover:text-slate-950 border border-emerald-500/40 hover:border-emerald-400 shadow-lg backdrop-blur-md flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95">
                     <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -402,7 +409,8 @@
                     <!-- Add to Playlist dropdown -->
                     <div class="bg-slate-800/60 p-4 rounded-2xl border border-slate-700/60 backdrop-blur-sm">
                         <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                            <span>📑</span> Simpan ke Playlist:
+                            <svg class="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                            <span>Simpan ke Playlist:</span>
                         </h4>
                         <select id="modalPlaylistSelect" class="w-full bg-slate-900 text-white text-xs px-3 py-2.5 rounded-xl border border-slate-700 mb-2 focus:outline-none focus:ring-1 focus:ring-emerald-500">
                             <option value="">Pilih Playlist...</option>
@@ -418,26 +426,30 @@
                     <!-- Metadata Info Badges -->
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
                         <div class="bg-slate-800/70 p-3.5 rounded-2xl border border-slate-700/60 hover:border-emerald-500/50 hover:bg-slate-800 hover:shadow-lg hover:shadow-emerald-500/10 hover:-translate-y-0.5 transition-all duration-300 backdrop-blur-md">
-                            <span class="text-slate-400 block mb-0.5 text-[11px] font-medium flex items-center gap-1">
-                                <span>📅</span> Tahun Rilis
+                            <span class="text-slate-400 block mb-0.5 text-[11px] font-medium flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                <span>Tahun Rilis</span>
                             </span>
                             <strong id="modalYear" class="text-white text-sm font-extrabold">1975</strong>
                         </div>
                         <div class="bg-slate-800/70 p-3.5 rounded-2xl border border-slate-700/60 hover:border-emerald-500/50 hover:bg-slate-800 hover:shadow-lg hover:shadow-emerald-500/10 hover:-translate-y-0.5 transition-all duration-300 backdrop-blur-md">
-                            <span class="text-slate-400 block mb-0.5 text-[11px] font-medium flex items-center gap-1">
-                                <span>🎸</span> Genre
+                            <span class="text-slate-400 block mb-0.5 text-[11px] font-medium flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+                                <span>Genre</span>
                             </span>
                             <strong id="modalGenre" class="text-emerald-400 text-sm font-extrabold">Rock</strong>
                         </div>
                         <div class="bg-slate-800/70 p-3.5 rounded-2xl border border-slate-700/60 hover:border-emerald-500/50 hover:bg-slate-800 hover:shadow-lg hover:shadow-emerald-500/10 hover:-translate-y-0.5 transition-all duration-300 backdrop-blur-md">
-                            <span class="text-slate-400 block mb-0.5 text-[11px] font-medium flex items-center gap-1">
-                                <span>⏱️</span> Durasi
+                            <span class="text-slate-400 block mb-0.5 text-[11px] font-medium flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                <span>Durasi</span>
                             </span>
                             <strong id="modalDuration" class="text-white text-sm font-extrabold">5:55</strong>
                         </div>
                         <div class="bg-slate-800/70 p-3.5 rounded-2xl border border-slate-700/60 hover:border-emerald-500/50 hover:bg-slate-800 hover:shadow-lg hover:shadow-emerald-500/10 hover:-translate-y-0.5 transition-all duration-300 backdrop-blur-md">
-                            <span class="text-slate-400 block mb-0.5 text-[11px] font-medium flex items-center gap-1">
-                                <span>⭐</span> Rating
+                            <span class="text-slate-400 block mb-0.5 text-[11px] font-medium flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5 text-yellow-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                <span>Rating</span>
                             </span>
                             <strong id="modalRating" class="text-yellow-400 text-sm font-extrabold">★ 4.8</strong>
                         </div>
@@ -446,7 +458,9 @@
                     <!-- Analisis & Deskripsi Multimedia -->
                     <div class="bg-gradient-to-br from-slate-800/80 via-slate-800/40 to-slate-900/60 p-5 rounded-2xl border border-slate-700/70 shadow-inner">
                         <div class="flex items-center gap-2 mb-2.5">
-                            <span class="w-6 h-6 rounded-lg bg-emerald-500/15 text-emerald-400 border border-emerald-500/25 flex items-center justify-center text-xs">📖</span>
+                            <span class="w-6 h-6 rounded-lg bg-emerald-500/15 text-emerald-400 border border-emerald-500/25 flex items-center justify-center">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                            </span>
                             <h4 class="text-xs font-bold text-slate-200 uppercase tracking-wider">Latar Belakang & Analisis Makna</h4>
                         </div>
                         <div id="modalDescriptionText" class="text-slate-300 text-sm leading-relaxed space-y-2 whitespace-pre-line"></div>
@@ -455,7 +469,8 @@
                     <!-- Review & Rating Input -->
                     <div class="border-t border-slate-800 pt-6">
                         <h4 class="text-sm font-bold text-white mb-3 flex items-center gap-2">
-                            <span>⭐</span> Berikan Ulasan & Rating Anda:
+                            <svg class="w-4 h-4 text-yellow-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                            <span>Berikan Ulasan & Rating Anda:</span>
                         </h4>
                         <div class="flex items-center gap-1.5 mb-3" id="inputStarContainer" onmouseleave="resetSongFormRatingPreview()">
                             @for($i = 1; $i <= 5; $i++)
@@ -481,7 +496,8 @@
                     <div class="border-t border-slate-800 pt-6">
                         <div class="flex items-center justify-between mb-3.5">
                             <h4 class="text-sm font-bold text-white flex items-center gap-2">
-                                <span>💬</span> Ulasan Komunitas (<span id="modalReviewsCount">0</span>)
+                                <svg class="w-4 h-4 text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                                <span>Ulasan Komunitas (<span id="modalReviewsCount">0</span>)</span>
                             </h4>
                             <span class="text-[11px] text-emerald-400 font-semibold flex items-center gap-1.5 bg-emerald-950/70 border border-emerald-500/30 px-2.5 py-0.5 rounded-full shadow-sm">
                                 <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>

@@ -69,6 +69,7 @@ function initModalBackdropEvents() {
                 if (modal.id === 'musicModal') closeMusicModal();
                 else if (modal.id === 'vinylModal') closeVinylModal();
                 else if (modal.id === 'lyricsModal') closeLyricsModal();
+                else if (modal.id === 'videoModal') closeVideoModal();
                 else {
                     modal.classList.add('modal-closing');
                     setTimeout(() => {
@@ -88,6 +89,7 @@ function initModalBackdropEvents() {
                 if (m.id === 'musicModal') closeMusicModal();
                 else if (m.id === 'vinylModal') closeVinylModal();
                 else if (m.id === 'lyricsModal') closeLyricsModal();
+                else if (m.id === 'videoModal') closeVideoModal();
                 else {
                     m.classList.add('modal-closing');
                     setTimeout(() => {
@@ -292,6 +294,11 @@ function updateProgressBarVisual(percent) {
         lyricsProgressBar.value = p;
         lyricsProgressBar.style.background = `linear-gradient(to right, #10b981 0%, #10b981 ${p}%, #334155 ${p}%, #334155 100%)`;
     }
+    const visProgressBar = document.getElementById('visProgressBar');
+    if (visProgressBar) {
+        visProgressBar.value = p;
+        visProgressBar.style.background = `linear-gradient(to right, #10b981 0%, #10b981 ${p}%, #334155 ${p}%, #334155 100%)`;
+    }
 }
 
 function updateTimeDisplays(cur, dur) {
@@ -303,6 +310,8 @@ function updateTimeDisplays(cur, dur) {
     const vinylDur = document.getElementById('vinylDuration');
     const lyricsCur = document.getElementById('lyricsCurrentTime');
     const lyricsDur = document.getElementById('lyricsDuration');
+    const visCur = document.getElementById('visCurrentTime');
+    const visDur = document.getElementById('visDuration');
 
     if (curTime) curTime.textContent = curStr;
     if (durTime) durTime.textContent = durStr;
@@ -310,6 +319,8 @@ function updateTimeDisplays(cur, dur) {
     if (vinylDur) vinylDur.textContent = durStr;
     if (lyricsCur) lyricsCur.textContent = curStr;
     if (lyricsDur) lyricsDur.textContent = durStr;
+    if (visCur) visCur.textContent = curStr;
+    if (visDur) visDur.textContent = durStr;
 }
 
 function startYtProgressTimer() {
@@ -317,6 +328,7 @@ function startYtProgressTimer() {
     const progressBar = document.getElementById('playerProgressBar');
     const vinylProgressBar = document.getElementById('vinylProgressBar');
     const lyricsProgressBar = document.getElementById('lyricsProgressBar');
+    const visProgressBar = document.getElementById('visProgressBar');
 
     ytProgressTimer = setInterval(() => {
         if (!isSeekingAudio && ytAudioPlayer && isYtReady && isAudioPlaying) {
@@ -328,6 +340,7 @@ function startYtProgressTimer() {
                     if (progressBar) progressBar.value = progress;
                     if (vinylProgressBar) vinylProgressBar.value = progress;
                     if (lyricsProgressBar) lyricsProgressBar.value = progress;
+                    if (visProgressBar) visProgressBar.value = progress;
                     updateProgressBarVisual(progress);
                     updateTimeDisplays(cur, dur);
                     syncActiveLyricLine(cur);
@@ -349,6 +362,7 @@ function initAudioPlayer() {
     const progressBar = document.getElementById('playerProgressBar');
     const vinylProgressBar = document.getElementById('vinylProgressBar');
     const lyricsProgressBar = document.getElementById('lyricsProgressBar');
+    const visProgressBar = document.getElementById('visProgressBar');
 
     audio.addEventListener('timeupdate', () => {
         if (!isSeekingAudio && currentPlaybackMode === 'html5' && audio.duration) {
@@ -356,6 +370,7 @@ function initAudioPlayer() {
             if (progressBar) progressBar.value = progress;
             if (vinylProgressBar) vinylProgressBar.value = progress;
             if (lyricsProgressBar) lyricsProgressBar.value = progress;
+            if (visProgressBar) visProgressBar.value = progress;
             updateProgressBarVisual(progress);
             updateTimeDisplays(audio.currentTime, audio.duration);
             syncActiveLyricLine(audio.currentTime);
@@ -432,6 +447,7 @@ function initAudioPlayer() {
     attachSeekEvents(progressBar);
     attachSeekEvents(vinylProgressBar);
     attachSeekEvents(lyricsProgressBar);
+    attachSeekEvents(visProgressBar);
 }
 
 function isLocalFullAudio(url) {
@@ -708,7 +724,11 @@ function updatePlayIcons(playing) {
     const vinylPauseIcon = document.getElementById('vinylModalPauseIcon');
     const lyricsPlayIcon = document.getElementById('lyricsModalPlayIcon');
     const lyricsPauseIcon = document.getElementById('lyricsModalPauseIcon');
+    const visPlayIcon = document.getElementById('visPlayIcon');
+    const visPauseIcon = document.getElementById('visPauseIcon');
+    const visBars = document.querySelectorAll('.visualizer-bar');
     const vinylBadge = document.getElementById('vinylStatusBadge');
+    const visFallback = document.getElementById('videoVisualizerFallback');
 
     if (playing) {
         if (playIcon) playIcon.classList.add('hidden');
@@ -717,9 +737,18 @@ function updatePlayIcons(playing) {
         if (vinylPauseIcon) vinylPauseIcon.classList.remove('hidden');
         if (lyricsPlayIcon) lyricsPlayIcon.classList.add('hidden');
         if (lyricsPauseIcon) lyricsPauseIcon.classList.remove('hidden');
+        if (visPlayIcon) visPlayIcon.classList.add('hidden');
+        if (visPauseIcon) visPauseIcon.classList.remove('hidden');
+        visBars.forEach(b => b.classList.remove('paused'));
         if (vinylBadge) {
             vinylBadge.textContent = 'Status: Berputar (Playing)';
             vinylBadge.className = 'px-3 py-1.5 rounded-full bg-emerald-950 text-emerald-400 font-semibold border border-emerald-800 text-xs shadow';
+        }
+        if (visFallback) {
+            visFallback.classList.remove('is-paused');
+            if (typeof handleVisualizerActivity === 'function') {
+                handleVisualizerActivity();
+            }
         }
     } else {
         if (playIcon) playIcon.classList.remove('hidden');
@@ -728,9 +757,19 @@ function updatePlayIcons(playing) {
         if (vinylPauseIcon) vinylPauseIcon.classList.add('hidden');
         if (lyricsPlayIcon) lyricsPlayIcon.classList.remove('hidden');
         if (lyricsPauseIcon) lyricsPauseIcon.classList.add('hidden');
+        if (visPlayIcon) visPlayIcon.classList.remove('hidden');
+        if (visPauseIcon) visPauseIcon.classList.add('hidden');
+        visBars.forEach(b => b.classList.add('paused'));
         if (vinylBadge) {
             vinylBadge.textContent = 'Status: Berhenti (Paused)';
             vinylBadge.className = 'px-3 py-1.5 rounded-full bg-slate-800 text-slate-400 font-semibold border border-slate-700 text-xs shadow';
+        }
+        if (visFallback) {
+            visFallback.classList.add('is-paused');
+            visFallback.classList.add('show-controls');
+            if (typeof visControlsTimeout !== 'undefined' && visControlsTimeout) {
+                clearTimeout(visControlsTimeout);
+            }
         }
     }
 }
@@ -1668,7 +1707,9 @@ function renderLyricsLines(song) {
     if (!currentLyricsLines || currentLyricsLines.length === 0) {
         container.innerHTML = `
             <div class="py-14 px-4 text-center space-y-2">
-                <div class="text-3xl mb-2">🎷</div>
+                <div class="w-12 h-12 mx-auto mb-2 text-emerald-400">
+                    <svg class="w-full h-full" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+                </div>
                 <p class="text-white font-bold text-base">${escapeHtml(song.title)} — ${escapeHtml(song.artist)}</p>
                 <p class="text-slate-400 text-xs max-w-md mx-auto leading-relaxed">
                     Komposisi ini merupakan karya instrumental atau lirik berwaktu belum tersedia untuk lagu ini. Nikmati alunan instrumen musiknya!
@@ -1861,6 +1902,9 @@ function fetchMusics(page = 1, smoothScroll = false) {
                                 </button>
                                 <button onclick="event.stopPropagation(); openLyricsWithSong('${escapeQuote(song.title)}', '${escapeQuote(song.artist)}', '/${song.image || 'image/queen1.jpg'}', ${song.id}, '${song.audio_url || ''}', '${song.video_id || ''}')" class="w-9 h-9 bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-emerald-500/40 rounded-full flex items-center justify-center shadow-xl transition-transform hover:scale-110" title="Putar dengan Lirik">
                                     <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M470.8 365.6c-.9-53.7-1.6-107.4-2.4-161.1c-.9-63.6-1.7-127.3-2.6-190.9c-.1-9.9-6.6-15.2-15.9-13.1c-25.8 5.9-51.7 11.7-77.5 17.5C306.7 32.7 241 47.5 175.3 62.2c-9.1 2-12.2 6.1-12.1 15.5c.2 7.5.3 14.9.4 22.4c1.3 90.7 2.5 181.4 3.7 272.1v9.8c-2.5-1.9-4.4-3.5-6.4-5c-17-12.6-36.1-17.4-56.9-14c-51.5 8.5-78.6 64.8-53.4 110.5c15.3 27.7 48.4 43.4 78.8 37.3c38-7.6 62.5-38.6 61.7-77.8c-.4-20.2-.8-40.4-1.1-60.7l-3-224.1c-.1-4.6 0-9.2 0-14c85.6-19.2 171.1-38.4 256.8-57.6c1.1 81.6 2.2 162.6 3.3 244.4c-1.7-1.3-2.6-2.1-3.6-2.9c-17.3-13.9-37.1-19.3-58.9-16c-54.2 8.2-83.1 71.4-49.5 117.3c17.9 24.4 42.6 35.1 72.6 30.4c30.3-4.8 50.1-23 59.9-52c3.6-10.6 3.4-21.4 3.2-32.2M115.6 489.4c-28.6.1-51.7-23.7-51.6-52.8s23.6-52.6 53-52.2c27.9.4 51.4 22.4 51.2 53.2c-.2 29.6-23.7 51.8-52.6 51.8m327.7-438c0 .9-2.1 2.3-3.4 2.6c-12.5 3-25 5.8-37.5 8.6c-20 4.5-40.1 8.9-60.1 13.4c-41.4 9.3-82.8 18.5-124.3 27.8c-9.6 2.2-19.3 4.3-28.9 6.5c-.6.1-1.2.1-3 .3c0-8.8-.1-17.4.2-25.9c0-.9 2.2-2.2 3.5-2.5c14.7-3.4 29.5-6.7 44.3-10c19.8-4.4 39.5-8.8 59.3-13.3l113.7-25.5c10.6-2.4 21.2-4.9 31.9-7.3c1.1-.2 2.2-.2 4.4-.4c.1 8.9.2 17.3-.1 25.7m-47.4 377c-28.1 0-52-24.1-52-52.4c0-28.6 23.8-52.7 52.1-52.7c28.9 0 52.3 23.7 52.3 53.1c-.2 28.3-24 52-52.4 52"/><path fill="currentColor" d="M64 436.6c.1-29.1 23.6-52.6 53-52.2c27.9.4 51.4 22.4 51.2 53.2c-.2 29.6-23.7 51.8-52.6 51.8c-28.6.1-51.7-23.7-51.6-52.8m384.2-60.2c0-29.4-23.3-53.1-52.3-53.1c-28.3 0-52.1 24.1-52.1 52.7c0 28.2 24 52.4 52 52.4c28.5 0 52.3-23.7 52.4-52m-259-266c9.6-2.2 19.3-4.3 28.9-6.5c41.4-9.3 82.8-18.6 124.3-27.8c20-4.5 40.1-8.9 60.1-13.4c12.5-2.8 25-5.6 37.5-8.6c1.3-.3 3.4-1.7 3.4-2.6c.3-8.4.2-16.9.2-25.8c-2.2.2-3.3.1-4.4.4c-10.6 2.4-21.2 4.9-31.9 7.3L293.6 58.9c-19.8 4.4-39.5 8.8-59.3 13.3c-14.8 3.3-29.5 6.6-44.3 10c-1.4.3-3.5 1.6-3.5 2.5c-.3 8.6-.2 17.1-.2 25.9c1.7-.1 2.3-.1 2.9-.2" opacity=".7"/></svg>
+                                </button>
+                                <button onclick="event.stopPropagation(); openVideoModal(${song.id}, '${escapeQuote(song.title)}', '${escapeQuote(song.artist)}', '${song.video_id || ''}', '${song.image ? (song.image.startsWith('/') ? song.image : '/' + song.image) : '/image/queen1.jpg'}')" class="w-9 h-9 bg-slate-800 hover:bg-slate-700 text-red-500 border border-red-500/40 hover:border-red-500 rounded-full flex items-center justify-center shadow-xl transition-transform hover:scale-110" title="Tonton Video MV">
+                                    <svg class="w-4 h-4 fill-current text-red-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>youtube</title><path fill="currentColor" d="m10 15l5.19-3L10 9zm11.56-7.83c.13.47.22 1.1.28 1.9c.07.8.1 1.49.1 2.09L22 12c0 2.19-.16 3.8-.44 4.83c-.25.9-.83 1.48-1.73 1.73c-.47.13-1.33.22-2.65.28c-1.3.07-2.49.1-3.59.1L12 19c-4.19 0-6.8-.16-7.83-.44c-.9-.25-1.48-.83-1.73-1.73c-.13-.47-.22-1.1-.28-1.9c-.07-.8-.1-1.49-.1-2.09L2 12c0-2.19.16-3.8.44-4.83c.25-.9.83-1.48 1.73-1.73c.47-.13 1.33-.22 2.65-.28c1.3-.07 2.49-.1 3.59-.1L12 5c4.19 0 6.8.16 7.83.44c.9.25 1.48.83 1.73 1.73"/></svg>
                                 </button>
                             </div>
                             <span class="absolute top-2.5 right-2.5 bg-black/70 backdrop-blur-md px-2 py-0.5 rounded-md text-xs font-bold text-yellow-400 border border-white/10">★ ${song.rating}</span>
@@ -2557,7 +2601,7 @@ function renderSongReviews(reviews) {
                 <div class="flex items-center justify-between mb-1.5">
                     <div class="flex items-center gap-2">
                         <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 text-xs font-bold flex items-center justify-center">
-                            🎵
+                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
                         </span>
                         <span class="text-xs font-semibold text-white">Pendengar Minima</span>
                         <span class="text-[10px] text-slate-400">• ${dateStr}</span>
@@ -2724,7 +2768,7 @@ function loadPlaylists() {
             grid.innerHTML = playlists.map(p => `
                 <div onclick="viewPlaylistDetail(${p.id})" class="bg-slate-800/80 p-5 rounded-2xl border border-slate-700/60 hover:border-emerald-500/50 transition-all hover:-translate-y-1 cursor-pointer group shadow-xl">
                     <div class="relative aspect-square bg-slate-700 rounded-xl mb-4 overflow-hidden flex items-center justify-center text-4xl shadow-inner border border-slate-700">
-                        ${p.image ? `<img src="/${p.image}?v=${Date.now()}" class="w-full h-full object-cover">` : '🎧'}
+                        ${p.image ? `<img src="/${p.image}?v=${Date.now()}" class="w-full h-full object-cover">` : '<svg class="w-10 h-10 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>'}
                         <button type="button" onclick="event.stopPropagation(); triggerPlaylistImageUpload(${p.id})" title="Ganti & Crop Gambar Sampul Playlist" class="absolute bottom-2.5 left-2.5 z-10 w-9 h-9 rounded-xl bg-slate-900/90 hover:bg-emerald-500 text-emerald-400 hover:text-slate-950 border border-emerald-500/40 hover:border-emerald-400 shadow-lg backdrop-blur-md flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95">
                             <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/>
@@ -2825,7 +2869,7 @@ function viewPlaylistDetail(playlistId) {
             document.getElementById('playlistViewCount').textContent = p.musics.length;
 
             const imgContainer = document.getElementById('playlistViewImage');
-            imgContainer.innerHTML = p.image ? `<img src="/${p.image}?v=${Date.now()}" class="w-full h-full object-cover">` : '🎵';
+            imgContainer.innerHTML = p.image ? `<img src="/${p.image}?v=${Date.now()}" class="w-full h-full object-cover">` : '<svg class="w-16 h-16 text-slate-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>';
 
             document.getElementById('deletePlaylistBtn').onclick = () => deletePlaylist(p.id);
 
@@ -3506,4 +3550,583 @@ function showConfirmAlert({
 function escapeQuote(str) {
     if (!str) return '';
     return str.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+}
+
+/* ==================== 6. VIDEO MV GALLERY & YOUTUBE PLAYER HD SYSTEM ==================== */
+let activeVideoSong = null;
+let currentVideoFilter = {
+    keyword: '',
+    genre: 'All',
+    page: 1,
+    perPage: 16
+};
+
+function pauseActiveAudio() {
+    // 1. Hentikan YouTube audio player jika aktif
+    if (currentPlaybackMode === 'youtube' && ytAudioPlayer && isYtReady) {
+        try {
+            ytAudioPlayer.pauseVideo();
+        } catch (e) {}
+    }
+
+    // 2. Hentikan HTML5 audio player
+    const audio = document.getElementById('globalAudioPlayer');
+    if (audio) {
+        audio.pause();
+    }
+
+    // 3. Hentikan synthesizer fallback
+    stopSynthesizedPreview();
+    isAudioPlaying = false;
+    updatePlayIcons(false);
+    stopYtProgressTimer();
+}
+
+let currentVideoModalMode = 'video';
+let videoModalYTPlayer = null;
+let hasActivatedVisualizerFallback = false;
+let visControlsTimeout = null;
+
+function handleVisualizerActivity() {
+    const fallback = document.getElementById('videoVisualizerFallback');
+    if (!fallback) return;
+    fallback.classList.add('show-controls');
+    if (visControlsTimeout) {
+        clearTimeout(visControlsTimeout);
+    }
+    if (isAudioPlaying) {
+        visControlsTimeout = setTimeout(() => {
+            fallback.classList.remove('show-controls');
+        }, 2500);
+    }
+}
+
+function openVideoModal(id, title, artist, videoId, cover) {
+    const validVideoId = (videoId && videoId.trim() !== '') ? videoId.trim() : 'fJ9rUzIMcZQ';
+    const finalCover = cover || '/image/queen1.jpg';
+
+    // 1. Hentikan pemutaran audio latar belakang agar tidak bentrok
+    pauseActiveAudio();
+    hasActivatedVisualizerFallback = false;
+
+    // 2. Set informasi lagu pada modal video
+    const titleEl = document.getElementById('videoModalTitle');
+    const artistEl = document.getElementById('videoModalArtist');
+    const coverEl = document.getElementById('videoModalCover');
+    const ytLink = document.getElementById('videoModalYtLink');
+
+    if (titleEl) titleEl.textContent = title;
+    if (artistEl) artistEl.textContent = artist;
+    if (coverEl) coverEl.src = finalCover;
+    if (ytLink) ytLink.href = `https://www.youtube.com/watch?v=${validVideoId}`;
+
+    activeVideoSong = { id, title, artist, videoId: validVideoId, cover: finalCover };
+
+    // Set visualizer backdrop
+    const isBlinding = (title && title.toLowerCase().includes('blinding lights')) || (artist && artist.toLowerCase().includes('the weeknd'));
+    const backdropImg = isBlinding ? '/image/theweeknd_blinding.jpg' : finalCover;
+
+    const visBackdrop = document.getElementById('visualizerBackdrop');
+    const visCenterImg = document.getElementById('visualizerCenterImg');
+    const visTitle = document.getElementById('visualizerTitle');
+    const visArtist = document.getElementById('visualizerArtist');
+
+    if (visBackdrop) visBackdrop.style.backgroundImage = `url('${backdropImg}')`;
+    if (visCenterImg) visCenterImg.src = backdropImg;
+    if (visTitle) visTitle.textContent = title;
+    if (visArtist) visArtist.textContent = `${artist} • Audio HD & Efek Visualizer`;
+
+    // 3. Konfigurasi mode video awal & loading curtain
+    currentVideoModalMode = 'video';
+    const iframeWrap = document.getElementById('videoIframeWrapper');
+    const mainMount = document.getElementById('mainVideoMount');
+    const loadingCurtain = document.getElementById('videoLoadingCurtain');
+    const visFallback = document.getElementById('videoVisualizerFallback');
+    const toggleBtn = document.getElementById('videoToggleModeBtn');
+    const toggleBtnText = document.getElementById('videoToggleModeText');
+    const modeBadge = document.getElementById('videoModalModeBadge');
+
+    // Aktifkan loading curtain pelindung layar agar error YouTube tidak bocor ke layar
+    if (loadingCurtain) {
+        loadingCurtain.classList.remove('opacity-0', 'pointer-events-none');
+    }
+    if (iframeWrap) iframeWrap.classList.remove('hidden');
+    if (visFallback) visFallback.classList.add('hidden');
+    if (toggleBtn) toggleBtn.classList.remove('hidden');
+    if (toggleBtnText) toggleBtnText.textContent = 'Mode Visualizer';
+    if (modeBadge) modeBadge.textContent = 'YouTube Player HD';
+
+    if (videoModalYTPlayer) {
+        try { videoModalYTPlayer.destroy(); } catch (e) {}
+        videoModalYTPlayer = null;
+    }
+
+    if (mainMount) {
+        mainMount.innerHTML = '<div id="ytPlayerContainer" class="w-full h-full"></div>';
+    }
+
+    const initYt = () => {
+        try {
+            videoModalYTPlayer = new YT.Player('ytPlayerContainer', {
+                videoId: validVideoId,
+                playerVars: {
+                    autoplay: 1,
+                    enablejsapi: 1,
+                    rel: 0,
+                    origin: window.location.origin
+                },
+                events: {
+                    'onReady': function(event) {
+                        event.target.playVideo();
+                    },
+                    'onStateChange': function(event) {
+                        // Hilangkan curtain hanya ketika video telah benar-benar siap dan mulai berputar (state 1 = PLAYING)
+                        if (event.data === 1 || (window.YT && event.data === YT.PlayerState.PLAYING)) {
+                            if (loadingCurtain) {
+                                loadingCurtain.classList.add('opacity-0', 'pointer-events-none');
+                            }
+                        }
+                    },
+                    'onError': function(event) {
+                        console.warn('YouTube Video Modal error:', event.data);
+                        if (event.data === 101 || event.data === 150 || event.data === 100 || event.data === 2) {
+                            activateAudiovisualizerMode(true);
+                        }
+                    }
+                }
+            });
+        } catch (err) {
+            console.warn('Notice: YT.Player creation error:', err);
+        }
+    };
+
+    if (window.YT && window.YT.Player) {
+        initYt();
+    } else {
+        setTimeout(initYt, 350);
+    }
+
+    // 4. Buka modal dengan animasi mulus
+    const modal = document.getElementById('videoModal');
+    if (modal) {
+        modal.classList.add('active');
+        lockBodyScroll();
+    }
+}
+
+// Global listener untuk deteksi postMessage dari YouTube iframe jika diblokir
+window.addEventListener('message', function onYtEmbedMessage(e) {
+    if (hasActivatedVisualizerFallback || currentVideoModalMode === 'visualizer') return;
+    if (!e.data || typeof e.data !== 'string') return;
+    try {
+        const data = JSON.parse(e.data);
+        if (data.event === 'onError' && (data.info === 101 || data.info === 150 || data.info === 100 || data.info === 2)) {
+            activateAudiovisualizerMode(true);
+        }
+    } catch (err) {}
+});
+
+function toggleVideoVisualizerMode() {
+    if (currentVideoModalMode === 'video') {
+        activateAudiovisualizerMode(false);
+    } else {
+        switchToVideoMode();
+    }
+}
+
+function activateAudiovisualizerMode(isAutoFallback = false) {
+    if (hasActivatedVisualizerFallback || currentVideoModalMode === 'visualizer') {
+        return;
+    }
+    hasActivatedVisualizerFallback = true;
+    currentVideoModalMode = 'visualizer';
+
+    const iframeWrap = document.getElementById('videoIframeWrapper');
+    const mainMount = document.getElementById('mainVideoMount');
+    const loadingCurtain = document.getElementById('videoLoadingCurtain');
+    const visFallback = document.getElementById('videoVisualizerFallback');
+    const toggleBtn = document.getElementById('videoToggleModeBtn');
+    const toggleBtnText = document.getElementById('videoToggleModeText');
+    const modeBadge = document.getElementById('videoModalModeBadge');
+
+    // 1. Hentikan dan bersihkan iframe agar YouTube berhenti memicu pesan error
+    if (videoModalYTPlayer) {
+        try { videoModalYTPlayer.destroy(); } catch (e) {}
+        videoModalYTPlayer = null;
+    }
+    if (mainMount) {
+        mainMount.innerHTML = '';
+    }
+    if (iframeWrap) {
+        iframeWrap.classList.add('hidden');
+    }
+    if (loadingCurtain) {
+        loadingCurtain.classList.add('opacity-0', 'pointer-events-none');
+    }
+
+    // 2. Tampilkan panggung audiovisualizer
+    if (visFallback) {
+        visFallback.classList.remove('hidden');
+        handleVisualizerActivity();
+    }
+
+    if (modeBadge) {
+        modeBadge.textContent = 'Audiovisualizer HD';
+    }
+
+    // 3. Jika video dibatasi hak cipta oleh studio (isAutoFallback), sembunyikan tombol switch ke video
+    // karena video tidak bisa di-embed di website luar. Jika switch manual, tombol tetap ada.
+    if (isAutoFallback) {
+        if (toggleBtn) toggleBtn.classList.add('hidden');
+    } else {
+        if (toggleBtn) {
+            toggleBtn.classList.remove('hidden');
+            if (toggleBtnText) toggleBtnText.textContent = 'Mode Video YouTube';
+        }
+    }
+
+    // 4. Putar audio lokal lagu jika belum sedang berputar
+    if (activeVideoSong && activeVideoSong.id) {
+        const songId = activeVideoSong.id;
+        if (!currentSong || currentSong.id !== songId || !isAudioPlaying) {
+            const cached = window.songDataCache && window.songDataCache[songId];
+            const audioUrl = cached?.audio_url || `/audio/${songId}.mp3`;
+            playSong(songId, activeVideoSong.title, activeVideoSong.artist, activeVideoSong.cover, audioUrl, activeVideoSong.videoId);
+        }
+    }
+}
+
+function switchToVideoMode() {
+    currentVideoModalMode = 'video';
+    hasActivatedVisualizerFallback = false;
+    const iframeWrap = document.getElementById('videoIframeWrapper');
+    const mainMount = document.getElementById('mainVideoMount');
+    const loadingCurtain = document.getElementById('videoLoadingCurtain');
+    const visFallback = document.getElementById('videoVisualizerFallback');
+    const toggleBtn = document.getElementById('videoToggleModeBtn');
+    const toggleBtnText = document.getElementById('videoToggleModeText');
+    const modeBadge = document.getElementById('videoModalModeBadge');
+
+    if (visFallback) visFallback.classList.add('hidden');
+    if (iframeWrap) iframeWrap.classList.remove('hidden');
+    if (loadingCurtain) loadingCurtain.classList.remove('opacity-0', 'pointer-events-none');
+    if (toggleBtn) toggleBtn.classList.remove('hidden');
+    if (toggleBtnText) toggleBtnText.textContent = 'Mode Visualizer';
+    if (modeBadge) modeBadge.textContent = 'YouTube Player HD';
+
+    // Hentikan musik visualizer saat kembali ke video
+    pauseActiveAudio();
+
+    if (videoModalYTPlayer) {
+        try { videoModalYTPlayer.destroy(); } catch (e) {}
+        videoModalYTPlayer = null;
+    }
+
+    if (mainMount && activeVideoSong) {
+        mainMount.innerHTML = '<div id="ytPlayerContainer" class="w-full h-full"></div>';
+        try {
+            videoModalYTPlayer = new YT.Player('ytPlayerContainer', {
+                videoId: activeVideoSong.videoId,
+                playerVars: {
+                    autoplay: 1,
+                    enablejsapi: 1,
+                    rel: 0,
+                    origin: window.location.origin
+                },
+                events: {
+                    'onReady': function(event) { event.target.playVideo(); },
+                    'onStateChange': function(event) {
+                        if (event.data === 1 || (window.YT && event.data === YT.PlayerState.PLAYING)) {
+                            if (loadingCurtain) loadingCurtain.classList.add('opacity-0', 'pointer-events-none');
+                        }
+                    },
+                    'onError': function(event) {
+                        if (event.data === 101 || event.data === 150 || event.data === 100 || event.data === 2) {
+                            activateAudiovisualizerMode(true);
+                        }
+                    }
+                }
+            });
+        } catch (e) {}
+    }
+}
+
+function toggleVisualizerPlayback() {
+    togglePlayAudio();
+}
+
+function seekVisualizerAudio(percent) {
+    seekAudio(percent);
+}
+
+function closeVideoModal() {
+    const modal = document.getElementById('videoModal');
+    if (!modal) return;
+
+    modal.classList.add('modal-closing');
+    hasActivatedVisualizerFallback = false;
+
+    if (visControlsTimeout) {
+        clearTimeout(visControlsTimeout);
+        visControlsTimeout = null;
+    }
+
+    // Hentikan video dan bersihkan player
+    if (videoModalYTPlayer) {
+        try {
+            videoModalYTPlayer.destroy();
+        } catch (e) {}
+        videoModalYTPlayer = null;
+    }
+
+    const mainMount = document.getElementById('mainVideoMount');
+    if (mainMount) {
+        mainMount.innerHTML = '';
+    }
+
+    const loadingCurtain = document.getElementById('videoLoadingCurtain');
+    if (loadingCurtain) {
+        loadingCurtain.classList.remove('opacity-0', 'pointer-events-none');
+    }
+
+    // Jika sedang dalam mode visualizer dan lagu berputar, hentikan audio
+    if (currentVideoModalMode === 'visualizer') {
+        pauseActiveAudio();
+    }
+
+    setTimeout(() => {
+        modal.classList.remove('active', 'modal-closing');
+        unlockBodyScroll();
+        currentVideoModalMode = 'video';
+        hasActivatedVisualizerFallback = false;
+        const iframeWrap = document.getElementById('videoIframeWrapper');
+        if (iframeWrap) iframeWrap.classList.remove('hidden');
+        const visFallback = document.getElementById('videoVisualizerFallback');
+        if (visFallback) visFallback.classList.add('hidden');
+        const toggleBtn = document.getElementById('videoToggleModeBtn');
+        if (toggleBtn) toggleBtn.classList.remove('hidden');
+    }, 220);
+}
+
+function switchFromVideoTo3D() {
+    if (!activeVideoSong) return;
+    const { title, artist, cover, id, videoId } = activeVideoSong;
+    closeVideoModal();
+    setTimeout(() => {
+        const cached = window.songDataCache && window.songDataCache[id];
+        openVinylWithSong(title, artist, cover, id, cached?.audio_url || '', videoId);
+    }, 250);
+}
+
+function switchFromVideoToLyrics() {
+    if (!activeVideoSong) return;
+    const { title, artist, cover, id, videoId } = activeVideoSong;
+    closeVideoModal();
+    setTimeout(() => {
+        const cached = window.songDataCache && window.songDataCache[id];
+        openLyricsWithSong(title, artist, cover, id, cached?.audio_url || '', videoId);
+    }, 250);
+}
+
+function openVideoModalForCurrentSong() {
+    if (!currentSong) {
+        showToast('Pilih dan putar lagu terlebih dahulu atau pilih dari Galeri Video MV.', 'info');
+        return;
+    }
+    const songId = currentSong.id;
+    const cached = window.songDataCache && window.songDataCache[songId];
+    const videoId = currentSong.videoId || (cached ? cached.video_id : 'fJ9rUzIMcZQ');
+    const title = currentSong.title;
+    const artist = currentSong.artist;
+    const cover = currentSong.cover || currentSong.image || (cached ? cached.image : '/image/queen1.jpg');
+    openVideoModal(songId, title, artist, videoId, cover);
+}
+
+function openVideoForCurrentModalSong() {
+    if (!activeModalSongId) return;
+    const cached = window.songDataCache && window.songDataCache[activeModalSongId];
+    if (!cached) return;
+    closeMusicModal();
+    setTimeout(() => {
+        const cover = cached.image ? (cached.image.startsWith('/') ? cached.image : '/' + cached.image) : '/image/queen1.jpg';
+        openVideoModal(cached.id, cached.title, cached.artist, cached.video_id, cover);
+    }, 250);
+}
+
+function renderVideosSection(page = 1) {
+    currentVideoFilter.page = page;
+    const grid = document.getElementById('videosGrid');
+    if (!grid) return;
+
+    // Ambil data lagu dari cache memori klien
+    let allSongs = Object.values(window.songDataCache || {});
+    if (allSongs.length === 0) {
+        grid.innerHTML = '<div class="col-span-full py-16 text-center text-slate-400"><div class="inline-block w-8 h-8 border-3 border-red-500 border-t-transparent rounded-full animate-spin mb-3"></div><p class="text-sm font-medium">Memuat katalog video musik...</p></div>';
+        fetch('/api/musics/search?per_page=200')
+            .then(res => res.json())
+            .then(data => {
+                const songs = data.data || [];
+                songs.forEach(s => {
+                    window.songDataCache[s.id] = s;
+                });
+                renderVideosSection(page);
+            })
+            .catch(() => {
+                grid.innerHTML = '<div class="col-span-full py-12 text-center text-red-400">Gagal memuat katalog video.</div>';
+            });
+        return;
+    }
+
+    // Filter berdasarkan kata kunci dan genre
+    const kw = (currentVideoFilter.keyword || '').toLowerCase().trim();
+    const selGenre = (currentVideoFilter.genre || 'All').toLowerCase();
+
+    let filtered = allSongs.filter(s => {
+        const matchGenre = (selGenre === 'all' || (s.genre && s.genre.toLowerCase() === selGenre));
+        const matchKw = !kw || 
+            (s.title && s.title.toLowerCase().includes(kw)) || 
+            (s.artist && s.artist.toLowerCase().includes(kw)) ||
+            (s.album && s.album.toLowerCase().includes(kw));
+        return matchGenre && matchKw;
+    });
+
+    const totalCountEl = document.getElementById('videosTotalCount');
+    if (totalCountEl) totalCountEl.textContent = `${filtered.length} Video Klip`;
+
+    if (filtered.length === 0) {
+        grid.innerHTML = '<div class="col-span-full py-16 text-center text-slate-400"><p class="text-base font-semibold">Tidak ada video musik yang sesuai dengan pencarian.</p><p class="text-xs text-slate-500 mt-1">Coba gunakan kata kunci lain atau pilih genre "Semua Video".</p></div>';
+        const pag = document.getElementById('videosPagination');
+        if (pag) pag.innerHTML = '';
+        return;
+    }
+
+    // Paginasi
+    const total = filtered.length;
+    const perPage = currentVideoFilter.perPage;
+    const totalPages = Math.ceil(total / perPage);
+    const start = (page - 1) * perPage;
+    const paged = filtered.slice(start, start + perPage);
+
+    grid.innerHTML = paged.map((song, idx) => {
+        const videoId = (song.video_id && song.video_id.trim() !== '') ? song.video_id.trim() : 'fJ9rUzIMcZQ';
+        const thumbUrl = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+        const coverImg = song.image ? (song.image.startsWith('/') ? song.image : '/' + song.image) : '/image/queen1.jpg';
+
+        return `
+            <div class="video-card song-card-animated bg-slate-800/80 rounded-2xl p-4 border border-slate-700/60 hover:border-red-500/50 transition-all duration-300 hover:-translate-y-1.5 shadow-lg flex flex-col justify-between group" style="animation-delay: ${Math.min(idx * 20, 240)}ms;">
+                <div>
+                    <!-- Video Thumbnail 16:9 -->
+                    <div class="relative overflow-hidden rounded-xl aspect-video mb-3.5 bg-black cursor-pointer shadow-md" onclick="openVideoModal(${song.id}, '${escapeQuote(song.title)}', '${escapeQuote(song.artist)}', '${videoId}', '${coverImg}')">
+                        <img src="${thumbUrl}" alt="${escapeHtml(song.title)}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.onerror=null; this.src='${coverImg}'">
+                        
+                        <!-- Red Play Button Overlay -->
+                        <div class="absolute inset-0 bg-slate-950/40 group-hover:bg-slate-950/60 transition-colors flex items-center justify-center">
+                            <div class="w-12 h-12 rounded-full bg-red-600/90 group-hover:bg-red-600 text-white flex items-center justify-center shadow-2xl transition-all duration-300 transform group-hover:scale-110 group-hover:shadow-red-500/50">
+                                <svg class="w-5 h-5 fill-current ml-0.5" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                            </div>
+                        </div>
+
+                        <!-- Duration Badge -->
+                        <span class="absolute bottom-2 right-2 bg-black/85 backdrop-blur-md px-2 py-0.5 rounded text-[11px] font-mono font-bold text-white border border-white/10">
+                            ${song.duration || '3:30'}
+                        </span>
+                        
+                        <!-- YouTube HD Badge -->
+                        <span class="absolute top-2 left-2 bg-slate-900/90 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow flex items-center gap-1 border border-slate-700">
+                            <svg class="w-3 h-3 text-red-500 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>youtube</title><path fill="currentColor" d="m10 15l5.19-3L10 9zm11.56-7.83c.13.47.22 1.1.28 1.9c.07.8.1 1.49.1 2.09L22 12c0 2.19-.16 3.8-.44 4.83c-.25.9-.83 1.48-1.73 1.73c-.47.13-1.33.22-2.65.28c-1.3.07-2.49.1-3.59.1L12 19c-4.19 0-6.8-.16-7.83-.44c-.9-.25-1.48-.83-1.73-1.73c-.13-.47-.22-1.1-.28-1.9c-.07-.8-.1-1.49-.1-2.09L2 12c0-2.19.16-3.8.44-4.83c.25-.9.83-1.48 1.73-1.73c.47-.13 1.33-.22 2.65-.28c1.3-.07 2.49-.1 3.59-.1L12 5c4.19 0 6.8.16 7.83.44c.9.25 1.48.83 1.73 1.73"/></svg>
+                            HD
+                        </span>
+                    </div>
+
+                    <!-- Song Info -->
+                    <h3 class="font-bold text-white text-base truncate cursor-pointer hover:text-red-400 transition-colors" onclick="openVideoModal(${song.id}, '${escapeQuote(song.title)}', '${escapeQuote(song.artist)}', '${videoId}', '${coverImg}')">${escapeHtml(song.title)}</h3>
+                    <p class="text-xs text-slate-400 truncate mt-0.5">${escapeHtml(song.artist)} • ${song.year}</p>
+                    <div class="mt-2 flex items-center gap-2">
+                        <span class="text-[11px] bg-slate-700/80 text-slate-300 px-2 py-0.5 rounded-full border border-slate-600">${escapeHtml(song.genre)}</span>
+                        <span class="text-[11px] text-yellow-400 font-bold">★ ${song.rating}</span>
+                    </div>
+                </div>
+
+                <!-- Footer Actions -->
+                <div class="mt-4 pt-3 border-t border-slate-700/50 flex items-center justify-between text-xs">
+                    <button onclick="openVideoModal(${song.id}, '${escapeQuote(song.title)}', '${escapeQuote(song.artist)}', '${videoId}', '${coverImg}')" class="text-red-400 hover:text-red-300 font-semibold inline-flex items-center gap-1.5 transition-colors">
+                        <svg class="w-3.5 h-3.5 text-red-500 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>youtube</title><path fill="currentColor" d="m10 15l5.19-3L10 9zm11.56-7.83c.13.47.22 1.1.28 1.9c.07.8.1 1.49.1 2.09L22 12c0 2.19-.16 3.8-.44 4.83c-.25.9-.83 1.48-1.73 1.73c-.47.13-1.33.22-2.65.28c-1.3.07-2.49.1-3.59.1L12 19c-4.19 0-6.8-.16-7.83-.44c-.9-.25-1.48-.83-1.73-1.73c-.13-.47-.22-1.1-.28-1.9c-.07-.8-.1-1.49-.1-2.09L2 12c0-2.19.16-3.8.44-4.83c.25-.9.83-1.48 1.73-1.73c.47-.13 1.33-.22 2.65-.28c1.3-.07 2.49-.1 3.59-.1L12 5c4.19 0 6.8.16 7.83.44c.9.25 1.48.83 1.73 1.73"/></svg>
+                        <span>Tonton Video</span>
+                    </button>
+                    <button onclick="openMusicModal(${song.id})" class="text-slate-400 hover:text-white transition-colors">
+                        Detail & Analisis →
+                    </button>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    renderVideosPagination(total, page, perPage);
+}
+
+function filterVideosLive(val) {
+    currentVideoFilter.keyword = val || '';
+    renderVideosSection(1);
+}
+
+function filterVideosByGenre(genre, btn) {
+    currentVideoFilter.genre = genre;
+    const select = document.getElementById('videoGenreSelect');
+    if (select) select.value = genre;
+
+    // Update pill buttons active state
+    const pills = document.querySelectorAll('.video-pill-btn');
+    pills.forEach(p => {
+        p.classList.remove('bg-red-600', 'text-white', 'shadow-md', 'shadow-red-600/20');
+        p.classList.add('bg-slate-800/80', 'text-slate-300', 'border', 'border-slate-700');
+    });
+    if (btn) {
+        btn.classList.remove('bg-slate-800/80', 'text-slate-300', 'border', 'border-slate-700');
+        btn.classList.add('bg-red-600', 'text-white', 'shadow-md', 'shadow-red-600/20');
+    }
+    renderVideosSection(1);
+}
+
+function renderVideosPagination(total, curPage, perPage) {
+    const pag = document.getElementById('videosPagination');
+    if (!pag) return;
+
+    const totalPages = Math.ceil(total / perPage);
+    if (totalPages <= 1) {
+        pag.innerHTML = `<div class="text-xs text-slate-400">Menampilkan seluruh <strong>${total}</strong> video musik resmi</div>`;
+        return;
+    }
+
+    let btns = '';
+    const maxButtons = 6;
+    let startPage = Math.max(1, curPage - 2);
+    let endPage = Math.min(totalPages, startPage + maxButtons - 1);
+    if (endPage - startPage < maxButtons - 1) {
+        startPage = Math.max(1, endPage - maxButtons + 1);
+    }
+
+    if (startPage > 1) {
+        btns += `<button onclick="renderVideosSection(1)" class="w-8 h-8 rounded-lg text-xs font-medium bg-slate-800 text-slate-300 hover:text-white border border-slate-700">1</button>`;
+        if (startPage > 2) btns += `<span class="px-1 text-slate-500">...</span>`;
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+        if (i === curPage) {
+            btns += `<button class="w-8 h-8 rounded-lg text-xs font-bold bg-red-600 text-white shadow">${i}</button>`;
+        } else {
+            btns += `<button onclick="renderVideosSection(${i})" class="w-8 h-8 rounded-lg text-xs font-medium bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 border border-slate-700 transition-colors">${i}</button>`;
+        }
+    }
+
+    if (endPage < totalPages) {
+        if (endPage < totalPages - 1) btns += `<span class="px-1 text-slate-500">...</span>`;
+        btns += `<button onclick="renderVideosSection(${totalPages})" class="w-8 h-8 rounded-lg text-xs font-medium bg-slate-800 text-slate-300 hover:text-white border border-slate-700">${totalPages}</button>`;
+    }
+
+    pag.innerHTML = `
+        <div class="flex items-center justify-between text-xs text-slate-400 w-full flex-wrap gap-3">
+            <span>Halaman <strong>${curPage}</strong> dari <strong>${totalPages}</strong> (Total ${total} video)</span>
+            <div class="flex items-center gap-1.5">${btns}</div>
+        </div>
+    `;
 }
