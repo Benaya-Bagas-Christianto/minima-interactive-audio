@@ -1,4 +1,8 @@
-# Minima Interactive Audio - Platform Jelajah Musik Multimedia Berbasis Web
+<div align="center">
+  <img src="public/favicon.svg" alt="Logo Minima Interactive Audio" width="88" height="88" />
+  <h1>Minima Interactive Audio</h1>
+  <p><strong>Platform Jelajah Musik Multimedia Berbasis Web</strong></p>
+</div>
 
 Minima Interactive Audio adalah aplikasi web multimedia interaktif yang dirancang untuk memberikan pengalaman eksplorasi musik digital secara menyeluruh. Aplikasi ini memadukan empat elemen utama sistem multimedia, yaitu teks, audio, video, dan objek 3D, dalam satu kesatuan sistem informasi berbasis Laravel dan Three.js.
 
