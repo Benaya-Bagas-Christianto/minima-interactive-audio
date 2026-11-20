@@ -231,8 +231,9 @@ php artisan serve
 
 Setelah server aktif, buka peramban web dan akses alamat:
 ```text
-http://127.0.0.1:8000
+http://localhost:8000
 ```
+*(Jika membuka `http://127.0.0.1:8000`, aplikasi akan otomatis mengarahkan ke `http://localhost:8000` agar pemutaran embed Video Musik YouTube tidak diblokir oleh kebijakan origin IP).*
 
 #### Opsi B: Menggunakan Laragon Virtual Host
 Jika menggunakan Laragon:

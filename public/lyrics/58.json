@@ -1,10 +1,11 @@
 {
-    "version": 3,
+    "version": 5,
     "id": 58,
     "title": "A Love Supreme, Pt. I – Acknowledgement",
     "artist": "John Coltrane",
-    "duration": 463.97,
+    "duration": 464.02,
     "synced": false,
+    "instrumental": false,
     "syncedLyrics": null,
     "plainLyrics": "A love supreme"
 }

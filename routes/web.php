@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MusicController;
 use App\Http\Controllers\PlaylistController;
 use App\Http\Controllers\ReviewController;
@@ -10,6 +11,12 @@ Route::get('/', [MusicController::class, 'index'])->name('home');
 
 // API Routes untuk Interaksi Multimedia Front-end
 Route::prefix('api')->group(function () {
+    // Autentikasi Akun (Sign In / Sign Up / Logout)
+    Route::get('/auth/me', [AuthController::class, 'me'])->name('api.auth.me');
+    Route::post('/auth/register', [AuthController::class, 'register'])->name('api.auth.register');
+    Route::post('/auth/login', [AuthController::class, 'login'])->name('api.auth.login');
+    Route::post('/auth/logout', [AuthController::class, 'logout'])->name('api.auth.logout');
+
     // Musik & Artis
     Route::get('/musics/search', [MusicController::class, 'apiSearch'])->name('api.musics.search');
     Route::get('/musics/suggestions', [MusicController::class, 'apiSuggestions'])->name('api.musics.suggestions');

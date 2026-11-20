@@ -2,18 +2,32 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Music;
 use App\Models\Playlist;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class PlaylistController extends Controller
 {
     /**
-     * Ambil semua playlist.
+     * Ambil daftar playlist (menampilkan playlist milik user yang sedang login + playlist komunitas).
      */
     public function index()
     {
-        $playlists = Playlist::withCount('musics')->latest()->get();
+        $query = Playlist::withCount('musics');
+
+        if (Auth::check()) {
+            $userId = Auth::id();
+            $query->where(function ($q) use ($userId) {
+                $q->where('user_id', $userId)
+                  ->orWhereNull('user_id');
+            })->orderByRaw('CASE WHEN user_id = ? THEN 0 ELSE 1 END', [$userId]);
+        } else {
+            $query->whereNull('user_id');
+        }
+
+        $playlists = $query->latest()->get();
         return response()->json($playlists);
     }
 
@@ -27,7 +41,7 @@ class PlaylistController extends Controller
     }
 
     /**
-     * Simpan playlist baru.
+     * Simpan playlist baru ke database (terhubung dengan akun user yang sedang login).
      */
     public function store(Request $request)
     {
@@ -37,7 +51,11 @@ class PlaylistController extends Controller
             'image' => 'nullable|string',
         ]);
 
+        $user = Auth::user();
+
         $playlist = Playlist::create([
+            'user_id' => $user ? $user->id : null,
+            'user_name' => $user ? $user->name : 'Komunitas Minima',
             'name' => $validated['name'],
             'description' => $validated['description'] ?? null,
             'image' => $validated['image'] ?? null,
@@ -45,7 +63,9 @@ class PlaylistController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Playlist berhasil dibuat!',
+            'message' => $user
+                ? "Playlist \"{$playlist->name}\" berhasil disimpan ke akun {$user->name}!"
+                : 'Playlist berhasil dibuat!',
             'playlist' => $playlist,
         ]);
     }
@@ -63,7 +83,13 @@ class PlaylistController extends Controller
 
         if (!$playlist->musics()->where('musics.id', $request->music_id)->exists()) {
             $playlist->musics()->attach($request->music_id);
-            return response()->json(['success' => true, 'message' => 'Lagu berhasil ditambahkan ke playlist!']);
+            $music = Music::find($request->music_id);
+            return response()->json([
+                'success' => true,
+                'message' => 'Lagu berhasil ditambahkan ke playlist!',
+                'music' => $music,
+                'musics_count' => $playlist->musics()->count(),
+            ]);
         }
 
         return response()->json(['success' => false, 'message' => 'Lagu sudah ada di dalam playlist ini.']);

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Music;
 use App\Models\Review;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ReviewController extends Controller
 {
@@ -33,8 +34,11 @@ class ReviewController extends Controller
         ]);
 
         $music = Music::findOrFail($validated['music_id']);
+        $user = Auth::user();
 
         $review = Review::create([
+            'user_id' => $user ? $user->id : null,
+            'user_name' => $user ? $user->name : 'Pendengar Minima',
             'music_id' => $music->id,
             'music_title' => $music->title,
             'artist' => $music->artist,

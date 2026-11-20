@@ -10,10 +10,17 @@ class Playlist extends Model
     use HasFactory;
 
     protected $fillable = [
+        'user_id',
+        'user_name',
         'name',
         'description',
         'image',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 
     public function musics()
     {
